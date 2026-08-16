@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>客製化 Prompt 產生器（3 欄）</title>
+  <style>
+    :root{
+      --bg:#bcd7ff;
+      --card:#ffffff;
+      --text:#0b0b0b;
+      --muted:#6b7280;
+      --border:#d1d5db;
+      --shadow:0 10px 30px rgba(0,0,0,.12);
+      --radius:16px;
+      --black:#111827;
+      --accent:#f59e0b;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", Arial, sans-serif;
+      color:var(--text);
+      background:var(--bg);
+    }
+    .wrap{max-width:1100px;margin:40px auto;padding:0 18px;}
+    h1{margin:0 0 10px;font-size:44px;letter-spacing:.2px}
+    .lead{margin:0 0 26px;line-height:1.6;font-size:18px;max-width:980px}
+    .hintline{margin:12px 0 26px;font-style:italic;font-weight:600;text-align:center}
+
+    .grid{
+      display:grid;
+      grid-template-columns: 280px 1fr;
+      gap:18px;
+      align-items:stretch;
+    }
+
+    .steps{
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+    }
+
+    .step{
+      background:var(--black);
+      color:#fff;
+      border-radius:18px;
+      padding:18px 18px;
+      min-height:110px;
+      display:flex;
+      gap:14px;
+      align-items:flex-start;
+      box-shadow:var(--shadow);
+    }
+    .badge{
+      width:40px;height:40px;border-radius:999px;
+      background:#fff;color:#111827;
+      display:grid;place-items:center;
+      font-weight:800;
+      flex:0 0 auto;
+    }
+    .step h3{margin:2px 0 6px;font-size:20px}
+    .step p{margin:0;color:#e5e7eb;line-height:1.4;font-size:14px}
+
+    .panel{
+      background:rgba(255,255,255,.32);
+      border-radius:18px;
+      padding:16px;
+      border:1px solid rgba(255,255,255,.45);
+    }
+
+    .field{
+      background:var(--card);
+      border-radius:14px;
+      padding:14px;
+      border:1px solid rgba(17,24,39,.08);
+      box-shadow:0 4px 14px rgba(0,0,0,.06);
+      margin-bottom:12px;
+    }
+    label{display:block;font-size:13px;color:var(--muted);margin:0 0 8px}
+    input, textarea{
+      width:100%;
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:14px 14px;
+      font-size:16px;
+      outline:none;
+    }
+    textarea{min-height:110px;resize:vertical;line-height:1.5}
+    input:focus, textarea:focus{border-color:#93c5fd;box-shadow:0 0 0 4px rgba(59,130,246,.18)}
+
+    .ready{
+      background:var(--card);
+      border-radius:18px;
+      border:1px solid rgba(17,24,39,.10);
+      box-shadow:var(--shadow);
+      padding:16px;
+    }
+    .readyHeader{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:10px;
+    }
+    .readyHeader .title{font-weight:800;font-size:18px}
+    .actions{display:flex;gap:10px;align-items:center}
+
+    .pill{
+      font-size:12px;
+      padding:8px 10px;
+      border-radius:999px;
+      background:#e5e7eb;
+      color:#374151;
+      font-weight:700;
+      border:1px solid rgba(17,24,39,.08);
+      user-select:none;
+    }
+
+    .btn{
+      border:none;
+      border-radius:999px;
+      padding:10px 14px;
+      font-weight:800;
+      cursor:pointer;
+      font-size:14px;
+    }
+    .btn.copy{background:var(--black);color:#fff}
+    .btn.copy[disabled]{opacity:.45;cursor:not-allowed}
+    .btn.reset{background:#fff;border:1px solid rgba(17,24,39,.14);color:#111827}
+
+    .output{
+      width:100%;
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:14px;
+      font-size:15px;
+      line-height:1.6;
+      white-space:pre-wrap;
+      min-height:120px;
+      background:#fbfbfb;
+    }
+
+    .footerNote{margin-top:10px;color:#6b7280;font-size:13px}
+
+    .toast{
+      position:fixed;left:50%;bottom:22px;transform:translateX(-50%);
+      background:#111827;color:#fff;padding:10px 14px;border-radius:999px;
+      font-size:13px;font-weight:700;opacity:0;pointer-events:none;
+      transition:opacity .18s ease, transform .18s ease;
+    }
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(-6px)}
+
+    @media (max-width: 900px){
+      .grid{grid-template-columns:1fr;}
+      .steps{order:2}
+      h1{font-size:34px}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Activity：客製化教練支援</h1>
+    <p class="lead">請填下面 3 格。系統會自動產生一段「可直接貼到 ChatGPT」的指令，幫你在整個課程中獲得更到位的支援。你提供的脈絡越清楚，ChatGPT 的回應就越有用。</p>
+    <div class="hintline">填完 3 格 → 複製指令 → 貼到 ChatGPT</div>
+
+    <div class="grid">
+      <div class="steps">
+        <div class="step">
+          <div class="badge">1</div>
+          <div>
+            <h3>加入你的名字</h3>
+            <p>這會讓最後的指令更像是「你的」而不是通用模板。</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="badge">2</div>
+          <div>
+            <h3>補上你的脈絡</h3>
+            <p>告訴 ChatGPT 你的角色/團隊/產業，回應會更貼近你的情境。</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="badge">3</div>
+          <div>
+            <h3>描述你要練的任務</h3>
+            <p>你想練貼文、簡報、週報、數據解讀都可以；重點是「具體、夠小」。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="field">
+          <label for="name">Name</label>
+          <input id="name" type="text" placeholder="輸入你的名字" autocomplete="name" />
+        </div>
+        <div class="field">
+          <label for="context">Role / Team / Industry</label>
+          <input id="context" type="text" placeholder="例如：學習設計、餐旅、營運" />
+        </div>
+        <div class="field">
+          <label for="task">Task</label>
+          <textarea id="task" placeholder="描述你想用 ChatGPT 練習的任務"></textarea>
+        </div>
+
+        <div class="ready">
+          <div class="readyHeader">
+            <div class="title">Ready-to-use prompt</div>
+            <div class="actions">
+              <span class="pill" id="statusPill">Complete 3 parts</span>
+              <button class="btn copy" id="copyBtn" disabled>複製指令</button>
+              <button class="btn reset" id="resetBtn">重設</button>
+            </div>
+          </div>
+          <div class="output" id="output">在上面 3 格輸入內容後，這裡會自動生成可用指令。</div>
+          <div class="footerNote">完成後你會得到一段結合「你是誰、你的脈絡、你要練的任務」的指令。</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">已複製到剪貼簿</div>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const nameEl = $("name");
+    const contextEl = $("context");
+    const taskEl = $("task");
+    const outputEl = $("output");
+    const copyBtn = $("copyBtn");
+    const resetBtn = $("resetBtn");
+    const statusPill = $("statusPill");
+    const toast = $("toast");
+
+    const buildPrompt = () => {
+      const name = (nameEl.value || "").trim();
+      const context = (contextEl.value || "").trim();
+      const task = (taskEl.value || "").trim();
+
+      const complete = name && context && task;
+      statusPill.textContent = complete ? "Ready to copy" : "Complete 3 parts";
+      statusPill.style.background = complete ? "#fde68a" : "#e5e7eb";
+      statusPill.style.color = complete ? "#7c2d12" : "#374151";
+      copyBtn.disabled = !complete;
+
+      if (!complete) {
+        outputEl.textContent = "在上面 3 格輸入內容後，這裡會自動生成可用指令。";
+        return "";
+      }
+
+      const prompt =
+`你好，我是 ${name}。我在 ${context} 工作/學習。\n` +
+`我正在上ChatGPT協作班，正在練習AI 基礎，目標是把 ChatGPT 用得更有效。\n` +
+`我想拿這個任務當練習題：${task}。\n` +
+`請你用教練的方式帶我：先確認你理解我的任務，再給我一個可執行的練習步驟與示範。`;
+
+      outputEl.textContent = prompt;
+      return prompt;
+    };
+
+    const showToast = () => {
+      toast.classList.add("show");
+      window.clearTimeout(showToast._t);
+      showToast._t = window.setTimeout(() => toast.classList.remove("show"), 1400);
+    };
+
+    const onChange = () => buildPrompt();
+    nameEl.addEventListener("input", onChange);
+    contextEl.addEventListener("input", onChange);
+    taskEl.addEventListener("input", onChange);
+
+    copyBtn.addEventListener("click", async () => {
+      const prompt = buildPrompt();
+      if (!prompt) return;
+      try {
+        await navigator.clipboard.writeText(prompt);
+        showToast();
+      } catch (e) {
+        // Fallback
+        const range = document.createRange();
+        range.selectNodeContents(outputEl);
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+        document.execCommand("copy");
+        sel.removeAllRanges();
+        showToast();
+      }
+    });
+
+    resetBtn.addEventListener("click", () => {
+      nameEl.value = "";
+      contextEl.value = "";
+      taskEl.value = "";
+      buildPrompt();
+      nameEl.focus();
+    });
+
+    // init
+    buildPrompt();
+  </script>
+</body>
+</html>
