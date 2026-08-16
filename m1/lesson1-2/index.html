@@ -41,6 +41,9 @@
       gap:14px;
     }
 
+    .desktopOnly{display:block;}
+    .mobileOnly{display:none;}
+
     .step{
       background:var(--black);
       color:#fff;
@@ -153,8 +156,13 @@
 
     @media (max-width: 900px){
       .grid{grid-template-columns:1fr;}
-      .steps{order:2}
       h1{font-size:34px}
+
+      /* Mobile: show each step card above its input */
+      .desktopOnly{display:none;}
+      .mobileOnly{display:block;}
+      .panel{padding:0;background:transparent;border:none;}
+      .field{margin-bottom:14px;}
     }
   </style>
 </head>
@@ -162,7 +170,7 @@
   <div class="wrap">
 
     <div class="grid">
-      <div class="steps">
+      <div class="steps desktopOnly">
         <div class="step">
           <div class="badge">1</div>
           <div>
@@ -187,13 +195,40 @@
       </div>
 
       <div class="panel">
+        <div class="mobileOnly">
+          <div class="step">
+            <div class="badge">1</div>
+            <div>
+              <h3>加入你的名字</h3>
+              <p>This personalizes the finished prompt.</p>
+            </div>
+          </div>
+        </div>
         <div class="field">
           <label for="name">Name</label>
           <input id="name" type="text" placeholder="輸入你的名字" autocomplete="name" />
         </div>
+        <div class="mobileOnly">
+          <div class="step">
+            <div class="badge">2</div>
+            <div>
+              <h3>補上你的脈絡</h3>
+              <p>Tell ChatGPT your role, team, or industry.</p>
+            </div>
+          </div>
+        </div>
         <div class="field">
           <label for="context">Role / Team / Industry</label>
           <input id="context" type="text" placeholder="例如：學習設計、餐旅、營運" />
+        </div>
+        <div class="mobileOnly">
+          <div class="step">
+            <div class="badge">3</div>
+            <div>
+              <h3>描述你要練的任務</h3>
+              <p>What do you want to practice with ChatGPT?</p>
+            </div>
+          </div>
         </div>
         <div class="field">
           <label for="task">Task</label>
