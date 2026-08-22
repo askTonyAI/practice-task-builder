@@ -1,0 +1,527 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>知識檢核｜何時要用可信來源</title>
+<style>
+  :root {
+    --bg: #B9D2FF;
+    --card: #FFFFFF;
+    --ink: #111111;
+    --muted: #4A5568;
+    --ok: #0F7B4F;
+    --bad: #C0392B;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Noto Sans TC", "Noto Sans CJK TC", -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC", "Microsoft JhengHei", sans-serif;
+    font-size: 16px; line-height: 1.5;
+    padding: 24px 24px 36px;
+  }
+  .wrap { max-width: 1120px; margin: 0 auto; }
+  header { text-align: center; }
+  .rule { width: 96px; height: 5px; background: var(--ink); border-radius: 3px; margin: 0 auto 24px; }
+  h1 { font-size: 34px; line-height: 1.15; margin: 0 0 8px; letter-spacing: -0.5px; }
+  .sub { font-size: 16px; font-style: italic; font-weight: 500; margin: 0; }
+  .howto { text-align: center; font-size: 15px; margin: 10px auto 0; max-width: 820px; }
+  .labels { display: flex; justify-content: space-between; margin: 20px 0 8px; }
+  .pill {
+    background: var(--ink); color: #fff; border-radius: 999px;
+    padding: 7px 18px; font-size: 14px; font-weight: 500;
+  }
+  .board { position: relative; display: grid; grid-template-columns: 1fr 140px 1fr; }
+  .col { display: grid; grid-template-rows: repeat(5, 84px); gap: 12px; }
+  .col::before { display: none; }
+  #wires { position: absolute; left: 0; top: 0; pointer-events: none; z-index: 3; overflow: visible; }
+  .card {
+    position: relative; z-index: 1;
+    touch-action: pan-y;
+    display: flex; align-items: center;
+    width: 100%; height: 100%;
+    text-align: left; font: inherit; color: var(--ink);
+    background: var(--card); border: 2px solid transparent; border-radius: 14px;
+    padding: 10px 20px; cursor: grab;
+    user-select: none; -webkit-user-select: none;
+    transition: background .18s ease, color .18s ease, border-color .16s ease, box-shadow .16s ease;
+  }
+  .card.done { cursor: default; }
+  .card:focus-visible { outline: 3px solid #1B3A6B; outline-offset: 3px; }
+  .card .txt { font-size: 16px; line-height: 1.4; pointer-events: none; }
+  .card.sel, .card.drag { border-color: var(--ink); box-shadow: 0 0 0 4px rgba(17,17,17,.14); }
+  .card.target { border-color: var(--ink); box-shadow: 0 0 0 6px rgba(17,17,17,.22); }
+  .card.done { background: var(--ink); color: #fff; }
+  .card.bad { border-color: var(--bad); animation: shake .3s ease; }
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    75% { transform: translateX(6px); }
+  }
+  .dot {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    width: 16px; height: 16px; border-radius: 50%;
+    background: #fff; border: 3px solid var(--ink);
+  }
+  .card[data-side="L"] .dot { right: -9px; }
+  .card[data-side="R"] .dot { left: -9px; }
+  .card.done .dot { background: var(--ink); border-color: #fff; }
+  .badge {
+    position: absolute; top: 10px; right: 12px;
+    width: 26px; height: 26px; border-radius: 50%;
+    background: #fff; color: var(--ink);
+    display: none; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 700;
+  }
+  .card.done .badge { display: flex; }
+  .card[data-side="L"].done .badge { right: 22px; }
+  .statusbar { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; margin-top: 16px; }
+  .count { font-size: 16px; font-weight: 700; }
+  .hint { font-size: 16px; min-height: 24px; }
+  .hint.bad { color: var(--bad); font-weight: 700; }
+  .hint.ok { color: var(--ok); font-weight: 700; }
+  .actions { display: flex; gap: 12px; margin: 14px 0 0; flex-wrap: wrap; }
+  .btn {
+    font: inherit; font-weight: 700; font-size: 16px;
+    min-height: 44px; padding: 10px 26px; border-radius: 999px;
+    border: 2px solid var(--ink); cursor: pointer;
+    background: var(--ink); color: #fff;
+  }
+  .btn.ghost { background: #fff; color: var(--ink); }
+  .btn:focus-visible { outline: 3px solid #1B3A6B; outline-offset: 3px; }
+  .answers { margin-top: 20px; background: #fff; border-radius: 16px; padding: 22px 26px; }
+  .answers h2 { font-size: 20px; margin: 0 0 14px; }
+  .answers ol { margin: 0; padding-left: 22px; }
+  .answers li { margin-bottom: 12px; }
+  .answers li:last-child { margin-bottom: 0; }
+  .answers b { display: block; }
+  .answers span { color: var(--muted); }
+  [hidden] { display: none !important; }
+
+  @media (max-width: 860px) {
+    body { padding: 28px 14px 44px; }
+    h1 { font-size: 32px; }
+    .sub { font-size: 16px; }
+    .howto { font-size: 15px; }
+    .labels { margin: 28px 0 10px; }
+    .pill { padding: 8px 16px; font-size: 13px; }
+    .board { grid-template-columns: 1fr 68px 1fr; }
+    .col { grid-template-rows: repeat(5, 108px); gap: 10px; }
+    .card { padding: 14px 16px; border-radius: 12px; }
+    .card .txt { font-size: 15px; }
+  }
+
+  @media (max-width: 560px) {
+    body { padding: 22px 10px 40px; }
+    h1 { font-size: 26px; }
+    .sub { font-size: 14px; }
+    .howto { font-size: 13.5px; }
+    .pill { padding: 7px 13px; font-size: 12px; }
+    .board { grid-template-columns: 1fr 40px 1fr; }
+    .col { grid-template-rows: repeat(5, 146px); gap: 8px; }
+    .card { padding: 10px 11px; border-radius: 10px; }
+    .card .txt { font-size: 13px; line-height: 1.45; }
+    .card .dot { width: 12px; height: 12px; border-width: 2px; }
+    .card[data-side="L"] .dot { right: -7px; }
+    .card[data-side="R"] .dot { left: -7px; }
+    .badge { width: 20px; height: 20px; font-size: 11px; top: 6px; right: 7px; }
+    .card[data-side="L"].done .badge { right: 14px; }
+    .btn { padding: 10px 20px; font-size: 15px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="rule"></div>
+    <h1>知識檢核</h1>
+    <p class="sub">看看下面的情境，把它連到最適合的下一步。</p>
+    <p class="howto">從左邊卡片拉一條<b>連線</b>到右邊對應的卡片（也可以先點左、再點右）。連對了線會留下並打勾，連錯了線會消失。</p>
+  </header>
+
+  <div class="labels">
+    <span class="pill">情境</span>
+    <span class="pill">最佳下一步</span>
+  </div>
+
+  <div class="board" id="board">
+    <div class="col" id="left" data-title="情境"></div>
+    <div></div>
+    <div class="col" id="right" data-title="最佳下一步"></div>
+    <svg id="wires" aria-hidden="true"></svg>
+  </div>
+
+  <div class="statusbar">
+    <span class="count" id="count">已連對 0 / 5</span>
+    <span class="hint" id="hint"></span>
+  </div>
+
+  <div class="actions">
+    <button class="btn ghost" id="reset" type="button">重新開始</button>
+    <button class="btn" id="reveal" type="button">顯示答案與解析</button>
+  </div>
+
+  <div class="answers" id="answers" hidden>
+    <h2>正解與理由</h2>
+    <ol id="answerList"></ol>
+  </div>
+</div>
+
+<script>
+(function () {
+  var SVG_NS = "http://www.w3.org/2000/svg";
+  var CIRCLED = ["\u2460", "\u2461", "\u2462", "\u2463", "\u2464"];
+
+  var PAIRS = [
+    {
+      id: "s1",
+      scenario: "你需要最新的政策、價格、新聞，或其他來自可信來源的資訊。",
+      step: "用搜尋或可信來源",
+      why: "需要最新或精確的資訊時，先取得來源，再讓 ChatGPT 加工；不要靠模型的記憶。"
+    },
+    {
+      id: "s2",
+      scenario: "ChatGPT 的回答聽起來很有信心，但你不確定它是否正確。",
+      step: "仔細檢查並驗證",
+      why: "流暢不等於正確。已經有答案、但沒驗過，就要自己對一次再用。"
+    },
+    {
+      id: "s3",
+      scenario: "你需要一份給新同事的歡迎訊息短草稿。",
+      step: "直接用 ChatGPT 起草",
+      why: "低風險、格式化的寫作任務，適合讓它先出一版，你再修。"
+    },
+    {
+      id: "s4",
+      scenario: "ChatGPT 的回答很籠統，不符合你的實際狀況。",
+      step: "補上更多脈絡",
+      why: "籠統的答案通常來自籠統的指令：說清楚對象、目的、限制與想要的成果。"
+    },
+    {
+      id: "s5",
+      scenario: "你想請 ChatGPT 摘要你手上已經有的文件。",
+      step: "上傳或提供原始素材",
+      why: "要它處理的材料就直接給它，不要讓它猜文件裡寫了什麼。"
+    }
+  ];
+
+  var boardEl = document.getElementById("board");
+  var svgEl = document.getElementById("wires");
+  var leftEl = document.getElementById("left");
+  var rightEl = document.getElementById("right");
+  var countEl = document.getElementById("count");
+  var hintEl = document.getElementById("hint");
+  var answersEl = document.getElementById("answers");
+  var answerListEl = document.getElementById("answerList");
+
+  var matched = {};
+  var pickedLeft = null;
+  var pickedRight = null;
+  var drag = null;
+  var flash = null;
+
+  function shuffled(list) {
+    var out = list.slice();
+    for (var i = out.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = out[i]; out[i] = out[j]; out[j] = t;
+    }
+    return out;
+  }
+
+  function indexOfPair(id) {
+    for (var i = 0; i < PAIRS.length; i++) { if (PAIRS[i].id === id) return i; }
+    return -1;
+  }
+
+  function find(id) {
+    var i = indexOfPair(id);
+    return i < 0 ? null : PAIRS[i];
+  }
+
+  function cardOf(id, side) {
+    return (side === "L" ? leftEl : rightEl).querySelector('[data-id="' + id + '"]');
+  }
+
+  function makeCard(id, text, side) {
+    var b = document.createElement("button");
+    b.type = "button";
+    b.className = "card";
+    b.dataset.id = id;
+    b.dataset.side = side;
+    var badge = document.createElement("span");
+    badge.className = "badge";
+    var dot = document.createElement("span");
+    dot.className = "dot";
+    var t = document.createElement("span");
+    t.className = "txt";
+    t.textContent = text;
+    b.appendChild(badge);
+    b.appendChild(dot);
+    b.appendChild(t);
+    b.addEventListener("pointerdown", onPointerDown);
+    b.addEventListener("click", function (e) { onClickCard(b, e); });
+    return b;
+  }
+
+  function build() {
+    matched = {};
+    pickedLeft = null;
+    pickedRight = null;
+    drag = null;
+    flash = null;
+    leftEl.innerHTML = "";
+    rightEl.innerHTML = "";
+    answersEl.hidden = true;
+    hintEl.textContent = "";
+    hintEl.className = "hint";
+
+    PAIRS.forEach(function (p) { leftEl.appendChild(makeCard(p.id, p.scenario, "L")); });
+    shuffled(PAIRS.map(function (p) { return p.id; })).forEach(function (id) {
+      var p = find(id);
+      rightEl.appendChild(makeCard(p.id, p.step, "R"));
+    });
+
+    updateCount();
+    redraw();
+  }
+
+  function anchorOf(card, side) {
+    var r = card.getBoundingClientRect();
+    var b = boardEl.getBoundingClientRect();
+    return {
+      x: (side === "L" ? r.right : r.left) - b.left,
+      y: r.top - b.top + r.height / 2
+    };
+  }
+
+  function pathD(a, z) {
+    var mx = (a.x + z.x) / 2;
+    return "M " + a.x + " " + a.y + " C " + mx + " " + a.y + ", " + mx + " " + z.y + ", " + z.x + " " + z.y;
+  }
+
+  function el(name, attrs) {
+    var n = document.createElementNS(SVG_NS, name);
+    Object.keys(attrs).forEach(function (k) { n.setAttribute(k, attrs[k]); });
+    return n;
+  }
+
+  function redraw() {
+    var b = boardEl.getBoundingClientRect();
+    svgEl.setAttribute("width", b.width);
+    svgEl.setAttribute("height", b.height);
+    while (svgEl.firstChild) { svgEl.removeChild(svgEl.firstChild); }
+
+    Object.keys(matched).forEach(function (id) {
+      var l = cardOf(id, "L");
+      var r = cardOf(id, "R");
+      if (!l || !r) return;
+      var d = pathD(anchorOf(l, "L"), anchorOf(r, "R"));
+      var p = el("path", { d: d, fill: "none", stroke: "#111", "stroke-width": "6", "stroke-linecap": "round" });
+      svgEl.appendChild(p);
+      var mid = p.getPointAtLength(p.getTotalLength() * 0.86);
+      svgEl.appendChild(el("circle", { cx: mid.x, cy: mid.y, r: 20, fill: "#fff", stroke: "#111", "stroke-width": "3" }));
+      svgEl.appendChild(el("path", {
+        d: "M " + (mid.x - 9) + " " + mid.y + " L " + (mid.x - 2) + " " + (mid.y + 7) + " L " + (mid.x + 10) + " " + (mid.y - 7),
+        fill: "none", stroke: "#111", "stroke-width": "3.4", "stroke-linecap": "round", "stroke-linejoin": "round"
+      }));
+    });
+
+    if (flash) {
+      svgEl.appendChild(el("path", {
+        d: pathD(flash.a, flash.z), fill: "none", stroke: "#C0392B",
+        "stroke-width": "5", "stroke-linecap": "round", "stroke-dasharray": "10 8"
+      }));
+    }
+
+    if (drag) {
+      svgEl.appendChild(el("path", {
+        d: pathD(drag.from, drag.to), fill: "none", stroke: "#111",
+        "stroke-width": "5", "stroke-linecap": "round", "stroke-dasharray": "10 9", opacity: "0.85"
+      }));
+      svgEl.appendChild(el("circle", { cx: drag.to.x, cy: drag.to.y, r: 7, fill: "#111" }));
+    }
+  }
+
+  function pointInBoard(e) {
+    var b = boardEl.getBoundingClientRect();
+    return { x: e.clientX - b.left, y: e.clientY - b.top };
+  }
+
+  function onPointerDown(e) {
+    var card = e.currentTarget;
+    if (card.classList.contains("done")) return;
+    if (e.pointerType === "mouse" && e.button !== 0) return;
+    clearPick();
+    drag = {
+      id: card.dataset.id,
+      side: card.dataset.side,
+      card: card,
+      from: anchorOf(card, card.dataset.side),
+      to: pointInBoard(e),
+      moved: false
+    };
+    card.classList.add("drag");
+    try { card.setPointerCapture(e.pointerId); } catch (err) {}
+    card.addEventListener("pointermove", onPointerMove);
+    card.addEventListener("pointerup", onPointerUp);
+    card.addEventListener("pointercancel", onPointerUp);
+    if (e.pointerType === "mouse") { e.preventDefault(); }
+    redraw();
+  }
+
+  function hoveredCard(e) {
+    var node = document.elementFromPoint(e.clientX, e.clientY);
+    return node ? node.closest(".card") : null;
+  }
+
+  function onPointerMove(e) {
+    if (!drag) return;
+    drag.moved = true;
+    drag.to = pointInBoard(e);
+    var over = hoveredCard(e);
+    Array.prototype.forEach.call(document.querySelectorAll(".card.target"), function (c) { c.classList.remove("target"); });
+    if (over && over !== drag.card && over.dataset.side !== drag.side && !over.classList.contains("done")) {
+      over.classList.add("target");
+    }
+    redraw();
+  }
+
+  function onPointerUp(e) {
+    if (!drag) return;
+    var card = drag.card;
+    card.removeEventListener("pointermove", onPointerMove);
+    card.removeEventListener("pointerup", onPointerUp);
+    card.removeEventListener("pointercancel", onPointerUp);
+    card.classList.remove("drag");
+    Array.prototype.forEach.call(document.querySelectorAll(".card.target"), function (c) { c.classList.remove("target"); });
+
+    var target = hoveredCard(e);
+    var d = drag;
+    drag = null;
+
+    if (!d.moved) { redraw(); return; }
+    if (!target || target === d.card || target.dataset.side === d.side || target.classList.contains("done")) {
+      redraw();
+      say("", "");
+      return;
+    }
+    evaluate(d.side === "L" ? d.card : target, d.side === "L" ? target : d.card);
+  }
+
+  function onClickCard(card, e) {
+    if (card.classList.contains("done")) return;
+    if (e && e.detail === 0 && document.activeElement !== card) { /* keyboard */ }
+    if (drag) return;
+    var side = card.dataset.side;
+    if (side === "L") {
+      if (pickedLeft) pickedLeft.classList.remove("sel");
+      pickedLeft = card;
+    } else {
+      if (pickedRight) pickedRight.classList.remove("sel");
+      pickedRight = card;
+    }
+    card.classList.add("sel");
+
+    if (!pickedLeft || !pickedRight) {
+      say(side === "L" ? "已選情境，接著點一個「最佳下一步」。" : "已選下一步，接著點一個「情境」。", "");
+      return;
+    }
+    evaluate(pickedLeft, pickedRight);
+  }
+
+  function evaluate(lCard, rCard) {
+    if (lCard.dataset.id === rCard.dataset.id) {
+      markDone(lCard.dataset.id);
+      clearPick();
+      updateCount();
+      redraw();
+      if (Object.keys(matched).length < PAIRS.length) { say("連對了！", "ok"); }
+    } else {
+      clearPick();
+      flash = { a: anchorOf(lCard, "L"), z: anchorOf(rCard, "R") };
+      redraw();
+      [lCard, rCard].forEach(function (c) {
+        c.classList.add("bad");
+        setTimeout(function () { c.classList.remove("bad"); }, 320);
+      });
+      say("這條線不對。再想一下：這個情境缺的是「來源」、「脈絡」、「驗證」，還是「直接起草」？", "bad");
+      setTimeout(function () { flash = null; redraw(); }, 520);
+    }
+  }
+
+  function markDone(id) {
+    matched[id] = true;
+    var n = CIRCLED[indexOfPair(id)];
+    ["L", "R"].forEach(function (side) {
+      var c = cardOf(id, side);
+      if (!c) return;
+      c.classList.remove("sel");
+      c.classList.add("done");
+      c.setAttribute("aria-disabled", "true");
+      c.querySelector(".badge").textContent = n;
+    });
+  }
+
+  function clearPick() {
+    Array.prototype.forEach.call(document.querySelectorAll(".card.sel"), function (c) { c.classList.remove("sel"); });
+    pickedLeft = null;
+    pickedRight = null;
+  }
+
+  function say(text, kind) {
+    hintEl.textContent = text;
+    hintEl.className = "hint" + (kind ? " " + kind : "");
+  }
+
+  function updateCount() {
+    var done = Object.keys(matched).length;
+    countEl.textContent = "已連對 " + done + " / " + PAIRS.length;
+    if (done === PAIRS.length) {
+      say("全部連對完成！往下看解析，確認你的理由跟答案一致。", "ok");
+      renderAnswers();
+    }
+  }
+
+  function renderAnswers() {
+    answerListEl.innerHTML = "";
+    PAIRS.forEach(function (p) {
+      var li = document.createElement("li");
+      var b = document.createElement("b");
+      b.textContent = p.scenario + " \u2192 " + p.step;
+      var s = document.createElement("span");
+      s.textContent = p.why;
+      li.appendChild(b);
+      li.appendChild(s);
+      answerListEl.appendChild(li);
+    });
+    answersEl.hidden = false;
+  }
+
+  function revealAll() {
+    PAIRS.forEach(function (p) { if (!matched[p.id]) markDone(p.id); });
+    clearPick();
+    updateCount();
+    redraw();
+    renderAnswers();
+  }
+
+  document.getElementById("reset").addEventListener("click", build);
+  document.getElementById("reveal").addEventListener("click", revealAll);
+  window.addEventListener("resize", redraw);
+  if (window.ResizeObserver) { new ResizeObserver(redraw).observe(boardEl); }
+
+  build();
+  if (window.QA_AUTOSOLVE) { revealAll(); }
+  if (window.QA_DRAG) {
+    var c = cardOf("s1", "L");
+    drag = { id: "s1", side: "L", card: c, from: anchorOf(c, "L"), to: { x: anchorOf(c, "L").x + 190, y: anchorOf(c, "L").y + 150 }, moved: true };
+    c.classList.add("drag");
+    redraw();
+  }
+})();
+</script>
+</body>
+</html>
