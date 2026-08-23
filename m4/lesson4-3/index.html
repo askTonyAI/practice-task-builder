@@ -114,7 +114,51 @@
   sourceBtns.forEach(function(btn){ btn.addEventListener("click", function(){ sourceType = btn.dataset.type; sourceBtns.forEach(function(b){ b.classList.toggle("active", b === btn); }); update(); }); });
   extractEl.addEventListener("input", update);
   audienceEl.addEventListener("input", update);
-  copyBtn.addEventListener("click", function(){ if(copyBtn.disabled) return; navigator.clipboard && navigator.clipboard.writeText(boxEl.textContent); msgEl.textContent = "已複製"; });
+  function setMsg(text, ok){ msgEl.textContent = text; msgEl.style.color = ok ? "#0F7B4F" : "#B42318"; }
+  function fallbackCopy(text){
+    var ta = document.createElement("textarea");
+    ta.value = text;
+    ta.setAttribute("readonly", "");
+    ta.style.position = "fixed";
+    ta.style.top = "-9999px";
+    ta.style.left = "-9999px";
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    var success = false;
+    try { success = document.execCommand("copy"); } catch(e) { success = false; }
+    document.body.removeChild(ta);
+    return success;
+  }
+  async function copyPrompt(){
+    if(copyBtn.disabled) return;
+    var text = boxEl.textContent.trim();
+    var copied = false;
+    try {
+      if(navigator.clipboard && window.isSecureContext){
+        await navigator.clipboard.writeText(text);
+        copied = true;
+      } else {
+        copied = fallbackCopy(text);
+      }
+    } catch(e) {
+      copied = fallbackCopy(text);
+    }
+    if(copied){
+      setMsg("已複製", true);
+      copyBtn.textContent = "已複製";
+      setTimeout(function(){ copyBtn.textContent = "複製指令"; }, 1400);
+    } else {
+      setMsg("無法自動複製，請手動選取文字複製", false);
+      boxEl.setAttribute("tabindex", "0");
+      var range = document.createRange();
+      range.selectNodeContents(boxEl);
+      var sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+    }
+  }
+  copyBtn.addEventListener("click", copyPrompt);
   resetBtn.addEventListener("click", function(){ sourceType = ""; extractEl.value = ""; audienceEl.value = ""; sourceBtns.forEach(function(b){ b.classList.remove("active"); }); update(); });
   demoBtn.addEventListener("click", function(){ sourceType = "file"; extractEl.value = "關鍵風險"; audienceEl.value = "高階主管"; sourceBtns.forEach(function(b){ b.classList.toggle("active", b.dataset.type === sourceType); }); update(); });
   update();
