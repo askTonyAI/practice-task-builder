@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>會議包 Prompt 產生器</title>
+  <style>
+    :root{--bg:#b9d7ff;--card:#fff;--ink:#111;--muted:#5f5f5f;--line:#d8d8d8;--soft:#f3f3f3;--disabled:#b8b8b8;--focus:#2783de;--ok:#18864b;--error:#d33b32}
+    *{box-sizing:border-box} body{margin:0;background:var(--bg);font-family:Arial,'Noto Sans TC','Microsoft JhengHei',sans-serif;color:var(--ink);font-size:16px;line-height:1.45}.wrap{max-width:1180px;margin:0 auto;padding:16px}.hero,.prompt{background:var(--card);border-radius:6px;padding:20px 24px;margin-bottom:18px}.hero h1,.prompt h2{margin:0 0 8px;font-size:30px;line-height:1.15;letter-spacing:-.02em}.hero p,.hint{margin:0;color:var(--muted);font-size:14px}.tabs{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}.tab{min-height:40px;padding:0 18px;border:1px solid var(--line);background:#fff;border-radius:999px;color:#111;cursor:pointer;font-weight:700}.tab.active{background:#000;color:#fff;border-color:#000}.tab:focus-visible,button:focus-visible,textarea:focus-visible{outline:3px solid rgba(39,131,222,.38);outline-offset:2px}.grid{display:grid;grid-template-columns:310px 1fr;gap:18px;margin-bottom:18px}.side{background:#000;color:#fff;border-radius:5px;min-height:148px;padding:24px 24px;display:flex;align-items:center;gap:18px}.num{flex:0 0 40px;width:40px;height:40px;border-radius:50%;background:#fff;color:#000;display:grid;place-items:center;font-weight:800}.side h3{margin:0 0 7px;font-size:26px;line-height:1.05;letter-spacing:-.02em}.side p{margin:0;font-size:14px;line-height:1.28;font-weight:700}.field{background:#fff;border-radius:5px;padding:16px}.field label{display:block;color:#666;font-size:14px;margin-bottom:8px}textarea{width:100%;min-height:96px;resize:vertical;border:1px solid #d2d2d2;border-radius:4px;padding:14px 16px;font:17px/1.45 Arial,'Noto Sans TC','Microsoft JhengHei',sans-serif;color:#222}textarea::placeholder{color:#6b6b6b;opacity:1}.promptHead{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}.actions{display:grid;grid-template-columns:150px 176px;gap:12px;align-items:start}.badge{height:40px;border:0;border-radius:999px;background:#f0f0f0;color:#222;font-weight:700}.copy,.reset,.known{min-height:54px;border-radius:999px;border:1px solid #ddd;background:#fff;font-size:15px;cursor:pointer;font-weight:700}.copy{background:#000;color:#fff;border-color:#000}.copy:disabled{background:var(--disabled);border-color:var(--disabled);cursor:not-allowed}.reset,.known{grid-column:2}.outrow{display:grid;grid-template-columns:1fr 188px;gap:18px;margin-top:12px}.outputBox{min-height:122px;border:1px solid #d2d2d2;border-radius:4px;padding:16px 18px;white-space:pre-wrap;font:15px/1.52 Arial,'Noto Sans TC','Microsoft JhengHei',sans-serif;color:#222;background:#fff}.empty{color:#555}.toast{min-height:20px;margin-top:8px;color:var(--ok);font-weight:800;font-size:13px}.toast.error{color:var(--error)}.note{margin:8px 0 0;color:#666;font-size:14px}@media (max-width:760px){.wrap{padding:12px}.hero,.prompt{padding:16px}.hero h1,.prompt h2{font-size:24px}.grid{grid-template-columns:126px 1fr;gap:10px;margin-bottom:10px}.side{min-height:126px;padding:12px 10px;gap:9px}.num{width:32px;height:32px;flex-basis:32px;font-size:13px}.side h3{font-size:18px}.side p{font-size:11px}.field{padding:12px}textarea{font-size:15px;min-height:92px;padding:12px}.promptHead{display:block}.actions{grid-template-columns:1fr 1fr;margin-top:14px}.badge{grid-column:1/3}.copy{grid-column:1/3}.reset{grid-column:1}.known{grid-column:2}.outrow{grid-template-columns:1fr}.copy,.reset,.known{min-height:50px;font-size:14px}}@media (max-width:430px){.grid{grid-template-columns:112px 1fr}.side{display:block}.num{margin-bottom:9px}.tabs{gap:8px}.tab{padding:0 13px}.actions{grid-template-columns:1fr}.badge,.copy,.reset,.known{grid-column:1}.outrow{gap:10px}.hero p{font-size:13px}}
+
+    /* Keep generated prompt in the bottom section, not inside the Output field */
+    .prompt{display:grid;grid-template-columns:minmax(0,1fr) 188px;grid-template-areas:"title actions" "output actions" "note actions" "toast actions";gap:10px 18px;background:var(--card);border-radius:6px;padding:20px 24px;margin-bottom:18px}
+    .promptHead{grid-area:title;display:block}.promptHead h2{margin:0 0 8px;font-size:30px;line-height:1.15;letter-spacing:-.02em}
+    .prompt .actions{grid-area:actions;display:flex;flex-direction:column;gap:12px}.prompt .badge{width:100%;height:40px}.prompt .copy,.prompt .reset,.prompt .known{width:100%;min-height:54px}
+    .prompt .outrow{grid-area:output;display:block;margin:0}.prompt .outputBox{min-height:122px;border:1px solid #d2d2d2;border-radius:4px;padding:16px 18px;white-space:pre-wrap;font:15px/1.52 Arial,'Noto Sans TC','Microsoft JhengHei',sans-serif;color:#222;background:#fff}
+    .prompt .note{grid-area:note;margin:8px 0 0;color:#666;font-size:14px}.prompt .toast{grid-area:toast;min-height:20px;margin-top:0}
+    @media (max-width:760px){.prompt{display:block;padding:16px}.prompt .actions{display:grid;grid-template-columns:1fr 1fr;margin-top:14px}.prompt .badge{grid-column:1/3}.prompt .copy{grid-column:1/3}.prompt .reset{grid-column:1}.prompt .known{grid-column:2}.prompt .outrow{margin-top:12px}}
+    @media (max-width:430px){.prompt .actions{grid-template-columns:1fr}.prompt .badge,.prompt .copy,.prompt .reset,.prompt .known{grid-column:1}}
+
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="hero">
+      <h1>會議包 Prompt 產生器</h1>
+      <p>選擇角色後，每個欄位的範例文字會跟著更新。你自己填的答案會保留。</p>
+      <div class="tabs" id="tabs"></div>
+    </section>
+    <section id="form"></section>
+    <section class="prompt">
+      <div class="promptHead"><h2>可直接使用的 Prompt</h2></div>
+      <div class="actions"><button class="badge" id="progress" type="button">已完成 0 / 6</button><button class="copy" id="copy" type="button" disabled>複製 Prompt</button><button class="reset" id="reset" type="button">重設</button><button class="known" id="known" type="button">我已經知道了</button></div>
+      <div class="outrow"><div class="outputBox empty" id="promptOutput">完成六個欄位後，就會產生可直接使用的 Prompt。</div></div>
+      <p class="note">完成後的 Prompt，會請 ChatGPT 把你的會議上下文整理成清楚、可重複使用的每週會議上下文區塊。</p>
+      <div class="toast" id="toast" aria-live="polite"></div>
+    </section>
+  </main>
+<script>
+const roles={
+'業務':{role:'Sales',meeting:'範例：業績管線回顧、預測回顧、區域業績回顧、策略客戶回顧，或銷售機會升級會議',audience:'範例：業務主管、客戶負責人與營收相關利害關係人；他們會決定預測信心、案件優先順序與升級處理行動',inputs:'範例：CRM 更新、通話紀錄、業績管線匯出資料、預測試算表、客戶 Email、會議錄音',decisions:'範例：哪些案件正在延遲、哪些客戶需要關注、哪些事項需要主管升級處理',output:'範例：主管摘要、案件風險報告、預測說明、下一步行動、主管簡報重點',risk:'範例：過度自信的預測、捏造客戶假設、漏掉利害關係人的細微差異，或錯判急迫性訊號'},
+'行銷':{role:'Marketing',meeting:'範例：活動成效回顧、行銷績效回顧、上市準備回顧、內容規劃會議，或成長策略回顧',audience:'範例：行銷主管、渠道負責人與活動相關利害關係人；他們會決定優先順序、實驗方向與訊息調整',inputs:'範例：活動儀表板、成效報告、付費媒體指標、社群分析、內容行事曆、競品更新',decisions:'範例：哪些活動要優先推進、哪些訊息要調整、下一步要跑哪些實驗',output:'範例：活動摘要、實驗建議、訊息調整、主管更新、成效敘事',risk:'範例：錯誤歸因、策略建議薄弱、訊息太籠統，或誤讀成效結果'},
+'資料科學':{role:'Data Science',meeting:'範例：實驗回顧、模型表現回顧、研究優先順序會議、資料品質回顧，或主管洞察回顧',audience:'範例：資料科學家、產品主管與業務利害關係人；他們會決定實驗優先順序、模型處置與洞察建議',inputs:'範例：實驗結果、模型指標、儀表板、SQL 匯出資料、研究筆記、錯誤紀錄',decisions:'範例：哪些異常值得關注、接下來要做哪些實驗、模型表現是否需要進一步調查',output:'範例：表現摘要、洞察敘事、實驗建議、風險評估、主管簡報',risk:'範例：混淆相關與因果、實驗解讀薄弱、誇大顯著性，或對利害關係人造成誤導'},
+'財務':{role:'Finance',meeting:'範例：預測回顧、差異分析回顧、主管財務回顧、預算規劃會議，或營運財務同步會議',audience:'範例：財務主管、預算負責人與業務利害關係人；他們會決定預測行動、風險說明與主管更新',inputs:'範例：財務報告、差異表、預測試算表、預算假設、營運指標、營收更新',decisions:'範例：哪些差異驅動因素最重要、要比較哪些情境、哪些財務風險需要主管關注',output:'範例：差異說明、預測摘要、主管簡報、情境比較、風險解釋',risk:'範例：過度自信的預測、誤解差異驅動因素、假設錯誤，或財務敘事薄弱'}
+};
+const sections=[['meeting','這場會議','這場會議的名稱，以及通常在一週中的哪一天發生。'],['audience','會議對象','誰會參加或閱讀這份會議包，以及他們會根據它做什麼決定。'],['inputs','三個主要輸入','會用到的三種不同資料來源、文件或系統。'],['decisions','三個主要決策','這場會議需要推動哪些決策往前走。'],['output','需要產出的內容','你要帶進會議的內容：投影片、報告，或關鍵談話重點。'],['risk','現實檢查','如果用了錯誤資料，或準備太倉促，可能會出什麼問題。']];
+let current='業務'; const answers={meeting:'',audience:'',inputs:'',decisions:'',output:'',risk:''};
+function el(id){return document.getElementById(id)}
+function esc(s){return s.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;')}
+function renderTabs(){el('tabs').innerHTML=Object.keys(roles).map(r=>`<button class="tab ${r===current?'active':''}" data-role="${esc(r)}" type="button">${r}</button>`).join('');document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{current=b.dataset.role;renderTabs();renderForm();updateOutput();});}
+function renderForm(){el('form').innerHTML=sections.map((s,i)=>`<div class="grid"><div class="side"><div class="num">${i+1}</div><div><h3>${s[1]}</h3><p>${s[2]}</p></div></div><div class="field"><label for="f-${s[0]}">${s[1]}</label><textarea id="f-${s[0]}" placeholder="${esc(roles[current][s[0]])}">${esc(answers[s[0]])}</textarea></div></div>`).join('');sections.forEach(s=>{el('f-'+s[0]).addEventListener('input',e=>{answers[s[0]]=e.target.value.trim();updateOutput();});});}
+function buildPrompt(){return `我的角色是：${current}
+這場會議是：${answers.meeting}
+會議對象是：${answers.audience}
+這場會議需要支援以下決策：${answers.inputs}
+我的主要輸入是：${answers.decisions}
+我需要準備的產出是：${answers.output}
+如果這份準備得不好，最大的風險是：${answers.risk}
+
+請把以上內容整理成一個清楚、可重複使用的「每週會議上下文區塊」。請保持精簡、實用，方便我在整門課裡隨時回頭參照。現在還不要產出完整的工作流程計畫。`;}
+function updateOutput(){const done=sections.filter(s=>answers[s[0]].length>0).length;el('progress').textContent=`已完成 ${done} / 6`;el('copy').disabled=done<6;if(done===0){el('promptOutput').className='outputBox empty';el('promptOutput').textContent='完成六個欄位後，就會產生可直接使用的 Prompt。'}else{el('promptOutput').className='outputBox';el('promptOutput').textContent=buildPrompt()}el('toast').textContent='';el('toast').className='toast';}
+function copyByTextarea(text){var ta=document.createElement('textarea');ta.value=text;ta.setAttribute('readonly','');ta.style.position='fixed';ta.style.top='0';ta.style.left='0';ta.style.width='1px';ta.style.height='1px';ta.style.opacity='0';document.body.appendChild(ta);ta.focus();ta.select();try{ta.setSelectionRange(0,ta.value.length)}catch(e){}var ok=false;try{ok=document.execCommand('copy')}catch(e){ok=false}document.body.removeChild(ta);return ok}
+function selectPrompt(){try{var r=document.createRange();r.selectNodeContents(el('promptOutput'));var sel=window.getSelection();sel.removeAllRanges();sel.addRange(r)}catch(e){}}
+function copied(){el('toast').className='toast';el('toast').textContent='已複製到剪貼簿。';var b=el('copy');b.textContent='已複製';setTimeout(function(){b.textContent='複製 Prompt'},1400)}
+function copyFailed(){selectPrompt();el('toast').className='toast error';el('toast').textContent='自動複製失敗，Prompt 已選取，請按 Ctrl/Cmd + C 複製。'}
+el('copy').onclick=function(){if(el('copy').disabled)return;var text=buildPrompt();el('toast').textContent='';if(copyByTextarea(text)){copied();return}if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(copied).catch(copyFailed)}else{copyFailed()}};
+el('reset').onclick=()=>{sections.forEach(s=>answers[s[0]]='');renderForm();updateOutput();};
+el('known').onclick=()=>{el('toast').className='toast';el('toast').textContent='如果你的會議上下文已經很清楚，可以跳過這個練習。'};
+renderTabs();renderForm();updateOutput();
+</script>
+</body>
+</html>
