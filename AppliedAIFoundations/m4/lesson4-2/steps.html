@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>互動步驟表</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Noto Sans TC", "Noto Sans CJK TC", "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      background-color: transparent;
+      padding: 24px 16px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 900px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+    }
+
+    .nav-btn {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: none;
+      background-color: #000000;
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+      outline: none;
+    }
+
+    .nav-btn:hover:not(:disabled) {
+      background-color: #333333;
+      transform: scale(1.05);
+    }
+
+    .nav-btn:disabled {
+      background-color: #D1D5DB;
+      color: #FFFFFF;
+      cursor: not-allowed;
+      opacity: 0.8;
+      transform: none;
+    }
+
+    .card-wrap {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .card {
+      background: #FFFFFF;
+      border-radius: 8px;
+      border: 1px solid #E5E7EB;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+      width: 100%;
+      min-height: 220px;
+      padding: 36px 32px 28px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .step-badge {
+      position: absolute;
+      top: -16px;
+      background: #000000;
+      color: #FFFFFF;
+      padding: 6px 20px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .step-content {
+      font-size: 20px;
+      font-weight: 700;
+      line-height: 1.5;
+      color: #0F172A;
+      max-width: 640px;
+      min-height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.2s ease;
+    }
+
+    .pagination {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .dot {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      font-weight: 600;
+      color: #64748B;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: all 0.2s ease;
+      background: transparent;
+    }
+
+    .dot:hover {
+      color: #0F172A;
+    }
+
+    .dot.active {
+      border-color: #000000;
+      color: #000000;
+      font-weight: 700;
+    }
+
+    @media (max-width: 640px) {
+      .container {
+        gap: 8px;
+      }
+      .nav-btn {
+        width: 38px;
+        height: 38px;
+      }
+      .card {
+        padding: 32px 16px 24px;
+        min-height: 190px;
+      }
+      .step-content {
+        font-size: 16px;
+      }
+      .pagination {
+        gap: 8px;
+      }
+      .dot {
+        width: 28px;
+        height: 28px;
+        font-size: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Prev Button -->
+    <button class="nav-btn" id="prevBtn" type="button" aria-label="上一個步驟" disabled>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"></polyline>
+      </svg>
+    </button>
+
+    <!-- Card Area -->
+    <div class="card-wrap">
+      <div class="card">
+        <div class="step-badge" id="stepBadge">步驟 1</div>
+        <div class="step-content" id="stepText">釐清目標對象，以及會議中需要做出哪些決策。</div>
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination">
+        <button class="dot active" type="button" onclick="goToStep(0)">1</button>
+        <button class="dot" type="button" onclick="goToStep(1)">2</button>
+        <button class="dot" type="button" onclick="goToStep(2)">3</button>
+        <button class="dot" type="button" onclick="goToStep(3)">4</button>
+        <button class="dot" type="button" onclick="goToStep(4)">5</button>
+        <button class="dot" type="button" onclick="goToStep(5)">6</button>
+      </div>
+    </div>
+
+    <!-- Next Button -->
+    <button class="nav-btn" id="nextBtn" type="button" aria-label="下一個步驟">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="9 18 15 12 9 6"></polyline>
+      </svg>
+    </button>
+  </div>
+
+  <script>
+    const steps = [
+      { num: 1, text: "釐清目標對象，以及會議中需要做出哪些決策。" },
+      { num: 2, text: "蒐集本週的輸入資料：儀表板、筆記、上一份資料包與待辦行動項目。" },
+      { num: 3, text: "找出本週最需要關注的三項重大進度更新。" },
+      { num: 4, text: "逐章節擬定資料包的草稿內容。" },
+      { num: 5, text: "審核草稿的正確性、語氣，以及是否遺漏了重要上下文。" },
+      { num: 6, text: "產出最終版本，以便在會議前發送分享。" }
+    ];
+
+    let currentStep = 0;
+
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const stepBadge = document.getElementById('stepBadge');
+    const stepText = document.getElementById('stepText');
+    const dots = document.querySelectorAll('.dot');
+
+    function updateView() {
+      stepBadge.textContent = `步驟 ${steps[currentStep].num}`;
+      stepText.textContent = steps[currentStep].text;
+
+      prevBtn.disabled = (currentStep === 0);
+      nextBtn.disabled = (currentStep === steps.length - 1);
+
+      dots.forEach((dot, index) => {
+        dot.classList.toggle('active', index === currentStep);
+      });
+    }
+
+    function goToStep(index) {
+      if (index >= 0 && index < steps.length) {
+        currentStep = index;
+        updateView();
+      }
+    }
+
+    prevBtn.addEventListener('click', () => {
+      if (currentStep > 0) {
+        currentStep--;
+        updateView();
+      }
+    });
+
+    nextBtn.addEventListener('click', () => {
+      if (currentStep < steps.length - 1) {
+        currentStep++;
+        updateView();
+      }
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') {
+        if (currentStep > 0) { currentStep--; updateView(); }
+      } else if (e.key === 'ArrowRight') {
+        if (currentStep < steps.length - 1) { currentStep++; updateView(); }
+      }
+    });
+  </script>
+</body>
+</html>
