@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>知識檢核｜工作流程問題與最佳解決方法</title>
+<style>
+:root{--bg:#b9d2ff;--ink:#111;--red:#d63b32;--green:#0f7b4f}*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg);font-family:"Noto Sans TC","Noto Sans CJK TC",Arial,sans-serif;color:var(--ink)}body{padding:18px}.wrap{position:relative;max-width:1120px;margin:0 auto}.heads{display:grid;grid-template-columns:minmax(0,1fr) 110px minmax(0,1fr);align-items:center;margin-bottom:12px}.head{justify-self:start;background:#000;color:#fff;border-radius:999px;padding:9px 18px;font-size:15px;font-weight:800}.head.right{grid-column:3;justify-self:end}.board{position:relative}.grid{display:grid;grid-template-columns:minmax(0,1fr) 110px minmax(0,1fr);gap:8px 0}.card{position:relative;width:100%;min-height:68px;border:2px solid transparent;border-radius:12px;background:#fff;color:#111;padding:12px 22px;text-align:left;font:700 15px/1.35 inherit;cursor:pointer;transition:background .15s,color .15s,border-color .15s,transform .15s}.left{grid-column:1}.rightCard{grid-column:3}.endpoint{position:absolute;top:50%;width:15px;height:15px;border:2px solid #111;border-radius:50%;background:#fff;transform:translateY(-50%);z-index:3}.left .endpoint{right:-8px}.rightCard .endpoint{left:-8px}.card.selected{border-color:#111}.card.done{background:#000;color:#fff}.card.done .endpoint{background:#fff;border-color:#000}.card.wrong{border-color:var(--red);animation:shake .25s linear 2}.card:focus-visible,.control:focus-visible{outline:3px solid #2783de;outline-offset:3px}@keyframes shake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none;z-index:2}.path{fill:none;stroke:#111;stroke-width:4;stroke-linecap:round}.path.error{stroke:var(--red);stroke-dasharray:8 7}.check{position:absolute;width:34px;height:34px;border-radius:50%;background:#fff;color:#111;display:grid;place-items:center;font-size:21px;font-weight:900;z-index:4;transform:translate(-50%,-50%)}.footer{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;margin-top:14px}.progress{font-size:14px;font-weight:800}.message{font-size:13px;color:var(--red);font-weight:700}.control{min-height:42px;border:2px solid #111;border-radius:999px;background:#fff;color:#111;padding:8px 16px;font-size:14px;font-weight:800;cursor:pointer}.control.primary{background:#000;color:#fff}.reasons{display:none;margin-top:14px;background:#fff;border-radius:12px;padding:16px 18px}.reasons.open{display:block}.reasons h2{font-size:17px;margin:0 0 8px}.reasons ol{margin:0;padding-left:24px;font-size:14px;line-height:1.55}.dragging{cursor:grabbing}@media(max-width:620px){body{padding:12px 8px}.heads,.grid{grid-template-columns:minmax(0,1fr) 44px minmax(0,1fr)}.head{padding:8px 12px;font-size:13px}.card{min-height:86px;padding:10px 13px;font-size:12.5px}.endpoint{width:13px;height:13px}.footer{grid-template-columns:1fr 1fr}.progress,.message{grid-column:1/-1}.control{font-size:13px;padding:7px 9px}.check{width:28px;height:28px;font-size:18px}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<main class="wrap">
+<div class="heads"><div class="head">問題</div><div class="head right">最佳解決方法</div></div>
+<section class="board" id="board" aria-label="將問題連到最佳解決方法"><svg id="lines" aria-hidden="true"></svg><div class="grid" id="grid"></div></section>
+<div class="footer"><div><div class="progress" id="progress">已連對 0／5</div><div class="message" id="message" role="status" aria-live="polite"></div></div><button class="control" id="reset" type="button">重新開始</button><button class="control primary" id="answers" type="button">顯示答案與解析</button></div>
+<section class="reasons" id="reasons"><h2>正解與理由</h2><ol id="reasonList"></ol></section>
+</main>
+<script>
+(function(){
+var PAIRS=[
+{id:'generic',scenario:'產出內容太籠統',step:'補充更多上下文',why:'產出太籠統，通常代表 ChatGPT 缺少足夠的背景資料與限制條件。'},
+{id:'review',scenario:'工作流程很難審核',step:'將工作拆成更小的步驟',why:'步驟越小，越容易逐一檢查事實、邏輯與語氣。'},
+{id:'forgot',scenario:'ChatGPT 忘記目標',step:'分享工作流程筆記',why:'工作流程筆記能重新提供目標、決策、限制條件與關鍵上下文。'},
+{id:'claims',scenario:'草稿包含缺乏依據的說法',step:'加入審核檢核點',why:'審核檢核點可要求確認說法、來源與假設，再決定是否繼續。'},
+{id:'broad',scenario:'任務範圍太廣',step:'縮小目標範圍',why:'先縮小目標，才能讓每次執行的任務保持明確且可完成。'}
+];
+var RIGHT_ORDER=['forgot','broad','generic','review','claims'];
+var grid=document.getElementById('grid'),board=document.getElementById('board'),svg=document.getElementById('lines'),progress=document.getElementById('progress'),message=document.getElementById('message'),reasons=document.getElementById('reasons'),reasonList=document.getElementById('reasonList');
+var selected=null,matched=new Set(),drag=null,errorPath=null;
+function makeCard(pair,side,row){var b=document.createElement('button');b.type='button';b.className='card '+(side==='left'?'left':'rightCard');b.dataset.id=pair.id;b.dataset.side=side;b.style.gridRow=String(row);b.innerHTML='<span>'+escapeHtml(side==='left'?pair.scenario:pair.step)+'</span><i class="endpoint" aria-hidden="true"></i>';b.addEventListener('click',function(){choose(b)});if(side==='left')b.addEventListener('pointerdown',startDrag);return b}
+function escapeHtml(s){return s.replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function render(){grid.innerHTML='';svg.innerHTML='';matched.clear();selected=null;message.textContent='';reasons.classList.remove('open');PAIRS.forEach(function(p,i){grid.appendChild(makeCard(p,'left',i+1))});RIGHT_ORDER.forEach(function(id,i){grid.appendChild(makeCard(PAIRS.find(function(p){return p.id===id}),'right',i+1))});update()}
+function choose(card){if(card.classList.contains('done'))return;if(!selected){selected=card;card.classList.add('selected');return}if(selected.dataset.side===card.dataset.side){selected.classList.remove('selected');selected=card;card.classList.add('selected');return}var left=selected.dataset.side==='left'?selected:card;var right=selected.dataset.side==='right'?selected:card;selected.classList.remove('selected');selected=null;check(left,right)}
+function check(left,right){if(left.dataset.id===right.dataset.id){complete(left,right)}else{flashWrong(left,right)}}
+function complete(left,right){matched.add(left.dataset.id);left.classList.add('done');right.classList.add('done');left.disabled=true;right.disabled=true;drawAll();update();message.textContent=matched.size===PAIRS.length?'全部配對完成！':''}
+function flashWrong(left,right){left.classList.add('wrong');right.classList.add('wrong');drawTemporary(left,right);message.textContent='這不是最佳配對，請再試一次。';setTimeout(function(){left.classList.remove('wrong');right.classList.remove('wrong');if(errorPath){errorPath.remove();errorPath=null}},650)}
+function point(card,side){var e=card.querySelector('.endpoint').getBoundingClientRect(),b=board.getBoundingClientRect();return{x:e.left+e.width/2-b.left,y:e.top+e.height/2-b.top}}
+function curve(a,b){var mid=(a.x+b.x)/2;return'M '+a.x+' '+a.y+' C '+mid+' '+a.y+', '+mid+' '+b.y+', '+b.x+' '+b.y}
+function drawPath(left,right,klass){var a=point(left,'left'),b=point(right,'right'),p=document.createElementNS('http://www.w3.org/2000/svg','path');p.setAttribute('d',curve(a,b));p.setAttribute('class','path'+(klass?' '+klass:''));svg.appendChild(p);return p}
+function drawAll(){svg.innerHTML='';board.querySelectorAll('.check').forEach(function(n){n.remove()});matched.forEach(function(id){var l=grid.querySelector('.left[data-id="'+id+'"]'),r=grid.querySelector('.rightCard[data-id="'+id+'"]');drawPath(l,r,'');var a=point(l),b=point(r),c=document.createElement('span');c.className='check';c.textContent='✓';c.style.left=((a.x+b.x)/2)+'px';c.style.top=((a.y+b.y)/2)+'px';board.appendChild(c)})}
+function drawTemporary(left,right){if(errorPath)errorPath.remove();errorPath=drawPath(left,right,'error')}
+function update(){progress.textContent='已連對 '+matched.size+'／'+PAIRS.length}
+function startDrag(e){var left=e.currentTarget;if(left.classList.contains('done'))return;e.preventDefault();left.setPointerCapture(e.pointerId);drag={left:left,id:e.pointerId,temp:document.createElementNS('http://www.w3.org/2000/svg','path')};drag.temp.setAttribute('class','path');svg.appendChild(drag.temp);document.body.classList.add('dragging');left.addEventListener('pointermove',moveDrag);left.addEventListener('pointerup',endDrag,{once:true});left.addEventListener('pointercancel',endDrag,{once:true})}
+function moveDrag(e){if(!drag)return;var a=point(drag.left),b=board.getBoundingClientRect(),to={x:e.clientX-b.left,y:e.clientY-b.top};drag.temp.setAttribute('d',curve(a,to))}
+function endDrag(e){if(!drag)return;var left=drag.left;left.removeEventListener('pointermove',moveDrag);drag.temp.remove();document.body.classList.remove('dragging');var target=document.elementFromPoint(e.clientX,e.clientY);var right=target&&target.closest('.rightCard');drag=null;if(right&&!right.classList.contains('done'))check(left,right)}
+function showAnswers(){PAIRS.forEach(function(p){if(!matched.has(p.id)){var l=grid.querySelector('.left[data-id="'+p.id+'"]'),r=grid.querySelector('.rightCard[data-id="'+p.id+'"]');matched.add(p.id);l.classList.add('done');r.classList.add('done');l.disabled=true;r.disabled=true}});drawAll();update();message.textContent='已顯示全部正解。';reasonList.innerHTML=PAIRS.map(function(p){return'<li><b>'+escapeHtml(p.scenario)+' → '+escapeHtml(p.step)+'</b>：'+escapeHtml(p.why)+'</li>'}).join('');reasons.classList.add('open')}
+document.getElementById('reset').addEventListener('click',render);document.getElementById('answers').addEventListener('click',showAnswers);window.addEventListener('resize',drawAll);render();if(location.hash==='#answers')showAnswers();
+})();
+</script>
+</body>
+</html>
