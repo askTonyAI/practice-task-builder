@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>即用指令</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Noto Sans TC", "Noto Sans CJK TC", "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      background-color: #B9D2FF;
+      padding: 20px 16px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .wrap {
+      width: 100%;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: #FFFFFF;
+      border-radius: 8px;
+      padding: 20px 24px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #111111;
+    }
+
+    .badge {
+      background-color: #F26522;
+      color: #FFFFFF;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 16px;
+    }
+
+    .actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn {
+      font-size: 14px;
+      font-weight: 600;
+      padding: 8px 18px;
+      border-radius: 20px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
+      outline: none;
+    }
+
+    .btn-black {
+      background-color: #000000;
+      color: #FFFFFF;
+      border: 1px solid #000000;
+    }
+
+    .btn-black:hover {
+      background-color: #262626;
+    }
+
+    .btn-outline {
+      background-color: #FFFFFF;
+      color: #111111;
+      border: 1px solid #D1D5DB;
+    }
+
+    .btn-outline:hover {
+      background-color: #F9FAFB;
+    }
+
+    .prompt-box {
+      border: 1px solid #E5E7EB;
+      border-radius: 6px;
+      padding: 16px 18px;
+      font-size: 15px;
+      line-height: 1.6;
+      color: #111111;
+      background: #FFFFFF;
+    }
+
+    @media (max-width: 640px) {
+      .header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .actions {
+        width: 100%;
+      }
+      .btn {
+        flex: 1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <div class="header">
+        <div class="header-left">
+          <span class="title">可直接使用的指令</span>
+          <span class="badge">指令已就緒</span>
+        </div>
+        <div class="actions">
+          <button class="btn btn-black" id="copyBtn" type="button">複製指令</button>
+          <button class="btn btn-outline" id="knownBtn" type="button">我已經知道了</button>
+        </div>
+      </div>
+
+      <div class="prompt-box" id="promptText">請根據我們關於每週會議的討論內容，將我的工作流程目標收斂成一句清晰的話。內容需包含：我想要達成什麼、目標對象是誰，以及最終的資料包應如何協助會議進行。請提供 2 到 3 個選項，推薦最明確的一個，並說明是否有任何選項過於廣泛。接著更新我工作流程計畫中的「目標」區塊。</div>
+    </div>
+  </div>
+
+  <script>
+    const copyBtn = document.getElementById('copyBtn');
+    const promptText = document.getElementById('promptText').innerText;
+
+    copyBtn.addEventListener('click', function() {
+      let success = false;
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(promptText).then(() => {
+          onCopySuccess();
+        }).catch(() => {
+          fallbackCopy();
+        });
+      } else {
+        fallbackCopy();
+      }
+
+      function fallbackCopy() {
+        try {
+          const textarea = document.createElement('textarea');
+          textarea.value = promptText;
+          textarea.style.position = 'fixed';
+          textarea.style.opacity = '0';
+          document.body.appendChild(textarea);
+          textarea.focus();
+          textarea.select();
+          success = document.execCommand('copy');
+          document.body.removeChild(textarea);
+          if (success) onCopySuccess();
+        } catch (e) {}
+      }
+
+      function onCopySuccess() {
+        copyBtn.textContent = '已複製';
+        setTimeout(() => {
+          copyBtn.textContent = '複製指令';
+        }, 1400);
+      }
+    });
+
+    const knownBtn = document.getElementById('knownBtn');
+    knownBtn.addEventListener('click', function() {
+      this.classList.toggle('active');
+      if (this.classList.contains('active')) {
+        this.style.backgroundColor = '#F3F4F6';
+      } else {
+        this.style.backgroundColor = '#FFFFFF';
+      }
+    });
+  </script>
+</body>
+</html>
