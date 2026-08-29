@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>互動卡片 2.1.1｜快速任務 vs 需要推理的任務</title>
+<style>
+  *{box-sizing:border-box}
+  html,body{margin:0;background:#fff;font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",Arial,sans-serif;color:#111;overflow:hidden}
+  .wrap{width:100%;padding:10px}
+  .grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+  .card{position:relative;height:340px;border:1px solid #d8d8d8;background:#fafafa;display:flex;align-items:center;justify-content:center;padding:28px;cursor:pointer;user-select:none;text-align:center}
+  .refresh{position:absolute;right:14px;top:12px;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;background:rgba(255,255,255,.85);font-weight:700}
+  .front{text-align:center}
+  .icon{width:92px;height:92px;margin:0 auto 30px;border-radius:50%;background:#111;color:#fff;display:flex;align-items:center;justify-content:center;font-size:44px;line-height:1}
+  .pill{display:inline-block;min-width:190px;border-radius:999px;color:#fff;font-size:28px;font-weight:900;padding:10px 26px;line-height:1.2}
+  .fast{background:#51d34d}
+  .reason{background:#7A5AF8}
+  .back{display:none;width:100%;text-align:left}
+  .card.flipped .front{display:none}
+  .card.flipped .back{display:block}
+  .kicker{font-size:15px;font-weight:800;color:#5A6472;letter-spacing:.04em;margin:0 0 10px}
+  .prompt{font-size:22px;line-height:1.4;font-weight:600;margin:0}
+  .note{font-size:15px;line-height:1.5;color:#5A6472;margin:16px 0 0}
+  .hint{text-align:center;color:#777;font-size:14px;margin-top:6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="grid">
+    <section class="card" onclick="this.classList.toggle('flipped')">
+      <div class="refresh">↻</div>
+      <div class="front">
+        <div class="icon" aria-hidden="true">⚡</div>
+        <div class="pill fast">快速任務</div>
+      </div>
+      <div class="back">
+        <p class="kicker">指令範例</p>
+        <p class="prompt">請把我每週報告裡的摘要段落改寫得更清楚一點。</p>
+        <p class="note">單一動作、風險低、不需要比較或取捨 → 用比較快的模型就夠了。</p>
+      </div>
+    </section>
+
+    <section class="card" onclick="this.classList.toggle('flipped')">
+      <div class="refresh">↻</div>
+      <div class="front">
+        <div class="icon" aria-hidden="true">🧠</div>
+        <div class="pill reason">需要推理的任務</div>
+      </div>
+      <div class="back">
+        <p class="kicker">指令範例</p>
+        <p class="prompt">請比較我每週報告裡的三個預測情境，分別從營收影響、風險、信心程度來評估。推薦其中一個，並說明可以怎麼限制取捨帶來的衝擊。</p>
+        <p class="note">多個限制條件、要比較、要做決定並說明理由 → 用推理模型比較合適。</p>
+      </div>
+    </section>
+  </div>
+  <div class="hint">點選卡片可切換正反面｜判斷方式：這件事只要「做一次」，還是需要「想清楚再決定」？</div>
+</div>
+</body>
+</html>
