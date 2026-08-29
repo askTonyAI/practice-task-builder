@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>設定技能｜12 個步驟</title>
+<style>
+:root{--ink:#111;--muted:#b9b9b9;--paper:#fff;--canvas:#fafafa}*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--canvas);font-family:"Noto Sans TC","Noto Sans CJK TC",Arial,sans-serif;color:var(--ink)}body{padding:30px 20px 18px}.wrap{max-width:1200px;margin:0 auto}.stage{display:grid;grid-template-columns:76px minmax(0,1fr) 76px;gap:24px;align-items:center}.arrow{width:64px;height:64px;border:0;border-radius:50%;background:#000;color:#fff;display:grid;place-items:center;cursor:pointer}.arrow:disabled{background:var(--muted);cursor:not-allowed}.arrow svg{width:28px;height:28px;fill:none;stroke:currentColor;stroke-width:5;stroke-linecap:round;stroke-linejoin:round}.card{position:relative;min-height:300px;background:var(--paper);box-shadow:0 10px 32px rgba(0,0,0,.06);padding:92px 54px 48px;display:flex;align-items:center}.stepBadge{position:absolute;top:-28px;left:50%;transform:translateX(-50%);background:#000;color:#fff;border-radius:14px;padding:16px 28px;font-size:26px;font-weight:800;white-space:nowrap}.content{font-size:21px;line-height:1.55;width:100%}.content strong{font-weight:850}.content ul{margin:18px 0 0;padding-left:34px}.content li{margin:12px 0}.pager{display:flex;justify-content:center;align-items:center;gap:12px;margin-top:24px;flex-wrap:nowrap}.pageBtn{width:34px;height:34px;border:2px solid transparent;border-radius:50%;background:transparent;color:#111;font-size:18px;cursor:pointer;padding:0}.pageBtn.active{border-color:#111}.pageBtn:focus-visible,.arrow:focus-visible{outline:3px solid #2783de;outline-offset:3px}@media(max-width:720px){body{padding:28px 8px 16px}.stage{grid-template-columns:48px minmax(0,1fr) 48px;gap:8px}.arrow{width:46px;height:46px}.arrow svg{width:22px;height:22px}.card{min-height:390px;padding:76px 22px 34px}.stepBadge{top:-23px;border-radius:11px;padding:12px 18px;font-size:20px}.content{font-size:17px;line-height:1.55}.content ul{padding-left:23px}.pager{gap:2px;margin-top:18px}.pageBtn{width:27px;height:30px;font-size:14px}}
+@media(max-width:390px){.stage{grid-template-columns:42px minmax(0,1fr) 42px}.arrow{width:40px;height:40px}.card{padding-left:17px;padding-right:17px}.content{font-size:16px}.pageBtn{width:25px;font-size:13px}}
+</style>
+</head>
+<body>
+<main class="wrap">
+<section class="stage" aria-live="polite">
+<button class="arrow" id="prev" type="button" aria-label="上一步"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M20 6L10 16l10 10"/></svg></button>
+<article class="card"><div class="stepBadge" id="badge">步驟 1</div><div class="content" id="content"></div></article>
+<button class="arrow" id="next" type="button" aria-label="下一步"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M12 6l10 10-10 10"/></svg></button>
+</section>
+<nav class="pager" id="pager" aria-label="選擇步驟"></nav>
+</main>
+<script>
+(function(){
+var STEPS=[
+'開啟 <strong>ChatGPT</strong>',
+'在左側邊欄選擇 <strong>Plugins</strong>',
+'選擇 <strong>Skills</strong> 分頁',
+'選擇 <strong>＋</strong> 圖示來建立新技能',
+'選擇 <strong>Create with editor</strong>',
+'<strong>根據每週工作流程替技能命名</strong>，例如「<strong>每週發布準備度簡報</strong>」',
+'加上一段簡短的<strong>說明</strong>，指出 ChatGPT 應在什麼情況下使用這項技能',
+'貼上「每週會議工作流程資料包」中可重複使用的部分：<ul><li>工作流程的目的</li><li>ChatGPT 每次應詢問的輸入資料</li><li>ChatGPT 應遵循的步驟</li><li>產出格式</li><li>ChatGPT 每次都應執行的審核檢查</li></ul>',
+'加入希望 ChatGPT 每次都遵循的<strong>範例、範本或審核檢查</strong>',
+'選擇 <strong>Create</strong> 來安裝這項技能',
+'建立完成後，可以在 <strong>Skills &gt; Personal</strong> 下方找到這項技能',
+'日後要使用時，請開啟新對話並提及技能名稱，例如：<strong>@每週發布準備度簡報</strong>'
+];
+var current=0,badge=document.getElementById('badge'),content=document.getElementById('content'),pager=document.getElementById('pager'),prev=document.getElementById('prev'),next=document.getElementById('next');
+function render(){badge.textContent='步驟 '+(current+1);content.innerHTML=STEPS[current];prev.disabled=current===0;next.disabled=current===STEPS.length-1;Array.from(pager.children).forEach(function(b,i){b.classList.toggle('active',i===current);b.setAttribute('aria-current',i===current?'step':'false')})}
+STEPS.forEach(function(_,i){var b=document.createElement('button');b.type='button';b.className='pageBtn';b.textContent=String(i+1);b.setAttribute('aria-label','前往步驟 '+(i+1));b.addEventListener('click',function(){current=i;render()});pager.appendChild(b)});
+prev.addEventListener('click',function(){if(current>0){current--;render()}});next.addEventListener('click',function(){if(current<STEPS.length-1){current++;render()}});document.addEventListener('keydown',function(e){if(e.key==='ArrowLeft'&&current>0){current--;render()}if(e.key==='ArrowRight'&&current<STEPS.length-1){current++;render()}});render();
+})();
+</script>
+</body>
+</html>
