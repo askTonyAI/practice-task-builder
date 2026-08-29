@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>互動卡片</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Noto Sans TC", "Noto Sans CJK TC", "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      background-color: transparent;
+      padding: 12px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      perspective: 1000px;
+    }
+
+    .flip-card {
+      background-color: transparent;
+      height: 280px;
+      cursor: pointer;
+      border: none;
+      outline: none;
+      padding: 0;
+      text-align: left;
+      width: 100%;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .flip-card-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transition: transform 0.5s ease;
+      transform-style: preserve-3d;
+      border-radius: 4px;
+    }
+
+    .flip-card.flipped .flip-card-inner {
+      transform: rotateY(180deg);
+    }
+
+    .flip-card-front, .flip-card-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
+      border: 1px solid #E5E7EB;
+      border-top: 3px solid #000000;
+      background: #FFFFFF;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    .flip-card-back {
+      transform: rotateY(180deg);
+    }
+
+    .flip-icon {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      width: 20px;
+      height: 20px;
+      color: #111111;
+    }
+
+    .card-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: #000000;
+    }
+
+    .card-text {
+      font-size: 16px;
+      line-height: 1.6;
+      color: #111111;
+      font-weight: 500;
+      padding: 0 10px;
+    }
+
+    @media (max-width: 640px) {
+      .cards-grid {
+        grid-template-columns: 1fr;
+      }
+      .flip-card {
+        height: 220px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="cards-grid">
+      <!-- Card 1 -->
+      <button class="flip-card" type="button" aria-label="翻轉卡片">
+        <div class="flip-card-inner">
+          <div class="flip-card-front">
+            <svg class="flip-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+              <path d="M3 3v5h5"></path>
+              <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"></path>
+              <path d="M16 21h5v-5"></path>
+            </svg>
+            <div class="card-title">與其這樣做：</div>
+          </div>
+          <div class="flip-card-back">
+            <svg class="flip-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+              <path d="M3 3v5h5"></path>
+              <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"></path>
+              <path d="M16 21h5v-5"></path>
+            </svg>
+            <div class="card-text">幫我看這份檔案。</div>
+          </div>
+        </div>
+      </button>
+
+      <!-- Card 2 -->
+      <button class="flip-card" type="button" aria-label="翻轉卡片">
+        <div class="flip-card-inner">
+          <div class="flip-card-front">
+            <svg class="flip-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+              <path d="M3 3v5h5"></path>
+              <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"></path>
+              <path d="M16 21h5v-5"></path>
+            </svg>
+            <div class="card-title">不如試試：</div>
+          </div>
+          <div class="flip-card-back">
+            <svg class="flip-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+              <path d="M3 3v5h5"></path>
+              <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"></path>
+              <path d="M16 21h5v-5"></path>
+            </svg>
+            <div class="card-text">請把這份檔案當作原始素材。摘要出三個最重要的發現、列出建議的行動項目，並標註任何我在採用這份摘要前應該先查證的事項。</div>
+          </div>
+        </div>
+      </button>
+    </div>
+  </div>
+
+  <script>
+    document.querySelectorAll('.flip-card').forEach(function(card) {
+      card.addEventListener('click', function() {
+        this.classList.toggle('flipped');
+      });
+      card.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          this.classList.toggle('flipped');
+        }
+      });
+    });
+  </script>
+</body>
+</html>
