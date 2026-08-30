@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>練習器 3.3.1</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --blue-bg: #b7d3f8;
+      --panel: #ffffff;
+      --text: #111111;
+      --border: #d4d4d4;
+      --orange: #ff7817;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; }
+    body {
+      background: var(--blue-bg);
+      color: var(--text);
+      font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+      padding: 16px;
+    }
+    .panel {
+      width: 100%;
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 24px 20px 20px;
+      background: var(--panel);
+      border-radius: 8px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 160px;
+      column-gap: 18px;
+      row-gap: 14px;
+    }
+    .main { min-width: 0; }
+    .heading-row {
+      min-height: 44px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    h1 {
+      margin: 0;
+      font-size: 20px;
+      line-height: 1.35;
+      font-weight: 600;
+    }
+    .status {
+      flex: 0 0 auto;
+      padding: 9px 15px;
+      border-radius: 999px;
+      background: var(--orange);
+      color: #fff;
+      font-size: 14px;
+      line-height: 1;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+    .prompt-box {
+      min-height: 92px;
+      padding: 18px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 16px;
+      line-height: 1.6;
+      display: flex;
+      align-items: flex-start;
+    }
+    .prompt-box p { margin: 0; }
+    .note {
+      margin: 14px 2px 0;
+      font-size: 14px;
+      line-height: 1.55;
+      font-style: italic;
+      font-weight: 500;
+    }
+    .actions {
+      padding-top: 1px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    button {
+      width: 100%;
+      min-height: 44px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font: inherit;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    .copy {
+      border: 1px solid #000;
+      background: #000;
+      color: #fff;
+    }
+    .known {
+      border: 1px solid var(--border);
+      background: #fff;
+      color: #111;
+    }
+    button:hover { filter: brightness(.96); }
+    button:focus-visible { outline: 3px solid #2783de; outline-offset: 3px; }
+    .copy[data-copied="true"] { background: #2f7d52; border-color: #2f7d52; }
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+    @media (max-width: 640px) {
+      body { padding: 12px; }
+      .panel {
+        padding: 16px;
+        grid-template-columns: 1fr;
+        row-gap: 12px;
+      }
+      .heading-row { min-height: 38px; margin-bottom: 10px; }
+      h1 { font-size: 14px; }
+      .status { padding: 8px 11px; font-size: 11px; }
+      .prompt-box { min-height: 82px; padding: 14px; font-size: 12px; line-height: 1.65; }
+      .note { margin-top: 10px; font-size: 11px; }
+      .actions { width: 70%; max-width: 180px; justify-self: end; padding-top: 0; gap: 8px; }
+      button { min-height: 44px; padding: 7px 10px; font-size: 11px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="panel" aria-label="可直接使用的提示">
+    <section class="main">
+      <div class="heading-row">
+        <h1>可直接使用的提示</h1>
+        <span class="status">提示已準備完成</span>
+      </div>
+      <div class="prompt-box" id="promptText">
+        <p><b>目標：</b><br>為我們的客戶導入流程改版建立一份專案摘要文件。<br><br><b>上下文：</b><br>使用專案中的檔案。上下文分散在會議筆記、競爭研究筆記，以及試算表中的客戶回饋。<br><br><b>產出：</b><br>建立一份 Word 專案摘要文件，內容包含摘要、目標、範圍、利害關係人、風險、決策、後續步驟、待確認問題，以及缺少的上下文。</p>
+      </div>
+      <p class="note">＊代理機器人應該建立一份可供你開啟查看的專案摘要初稿。</p>
+    </section>
+    <aside class="actions" aria-label="提示操作">
+      <button class="copy" id="copyButton" type="button">複製提示</button>
+      <button class="known" type="button">我已經知道了</button>
+    </aside>
+    <p class="sr-only" id="copyStatus" aria-live="polite"></p>
+  </main>
+  <script>
+    const copyButton = document.getElementById('copyButton');
+    const copyStatus = document.getElementById('copyStatus');
+    const promptText = document.getElementById('promptText').innerText.trim();
+
+    async function copyPrompt() {
+      let copied = false;
+      try {
+        await navigator.clipboard.writeText(promptText);
+        copied = true;
+      } catch (_) {
+        const textarea = document.createElement('textarea');
+        textarea.value = promptText;
+        textarea.setAttribute('readonly', '');
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        try { copied = document.execCommand('copy'); } catch (_) { copied = false; }
+        textarea.remove();
+      }
+
+      if (copied) {
+        copyButton.textContent = '已複製';
+        copyButton.dataset.copied = 'true';
+        copyStatus.textContent = '提示已複製到剪貼簿。';
+        setTimeout(() => {
+          copyButton.textContent = '複製提示';
+          delete copyButton.dataset.copied;
+        }, 1800);
+      } else {
+        const range = document.createRange();
+        range.selectNodeContents(document.getElementById('promptText'));
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
+        copyStatus.textContent = '無法自動複製，已選取提示文字，請手動複製。';
+        alert('無法自動複製，已為你選取提示文字，請手動複製。');
+      }
+    }
+
+    copyButton.addEventListener('click', copyPrompt);
+  </script>
+</body>
+</html>
