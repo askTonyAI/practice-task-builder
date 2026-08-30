@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Chat 還是代理機器人？</title>
+<style>
+:root{--bg:#aecdf6;--zone:#99b9e5;--ink:#0b0b0c;--card:#fff;--focus:#3478d4;--error:#b42318}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:"Noto Sans TC","Microsoft JhengHei",Arial,sans-serif;color:var(--ink)}
+body{background:var(--bg);overflow-x:hidden}.game{width:100%;min-height:560px;padding:20px 16px 28px;display:flex;flex-direction:column;align-items:center}.stage{height:245px;width:100%;display:flex;align-items:flex-start;justify-content:center;position:relative}.card{width:180px;height:150px;background:var(--card);border-top:2px solid #111;border-radius:2px;box-shadow:0 8px 18px rgba(31,67,115,.18);display:flex;align-items:center;justify-content:center;text-align:center;padding:24px 18px 30px;font-size:16px;font-weight:700;line-height:1.38;position:relative;touch-action:none;user-select:none;cursor:grab;z-index:5;transition:transform .2s ease,opacity .18s ease}.card:active{cursor:grabbing}.card:focus-visible{outline:3px solid var(--focus);outline-offset:4px}.card.dragging{transition:none;cursor:grabbing;transform:rotate(4deg) scale(1.02);box-shadow:0 14px 26px rgba(31,67,115,.28)}.card.wrong{animation:shake .38s ease}.grip{position:absolute;bottom:15px;left:50%;width:16px;height:6px;transform:translateX(-50%);background:repeating-linear-gradient(to bottom,#cfcfcf 0 1px,transparent 1px 2px)}
+.feedback{position:absolute;top:168px;left:50%;transform:translateX(-50%);min-height:36px;color:var(--error);font-size:14px;font-weight:800;display:flex;align-items:center;justify-content:center;gap:7px;white-space:nowrap;opacity:0}.feedback.show{opacity:1}.feedback b{width:22px;height:22px;border-radius:50%;background:var(--error);color:#fff;display:grid;place-items:center;font-size:14px}
+.zones{width:460px;display:grid;grid-template-columns:180px 180px;gap:100px;justify-content:center}.zone{width:180px;height:150px;background:rgba(130,168,220,.55);border:1px dashed #202733;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;position:relative;transition:background .15s ease,box-shadow .15s ease,border-color .15s ease;cursor:pointer}.zone.hover{background:rgba(122,162,218,.76);box-shadow:0 0 0 3px rgba(52,120,212,.22) inset}.zone.error{background:rgba(255,218,214,.72);border-color:var(--error);box-shadow:0 0 0 3px rgba(180,35,24,.13) inset}.zone:focus-visible{outline:3px solid var(--focus);outline-offset:3px}.placed{width:180px;height:150px;padding:24px 18px 30px;font-size:16px;position:absolute;inset:0;cursor:default;z-index:3}.check{position:absolute;left:-9px;top:-9px;width:28px;height:28px;border-radius:50%;background:#080808;color:#fff;display:grid;place-items:center;font-size:17px;font-weight:800}.result{height:245px;width:100%;text-align:center;display:none;padding-top:20px}.result.show{display:block}.score{font-size:20px;font-weight:800;white-space:nowrap}.divider{width:130px;height:1px;background:rgba(38,77,130,.25);margin:42px auto 26px}.replay{border:0;background:transparent;color:#111;font:800 14px/1 "Noto Sans TC","Microsoft JhengHei",Arial,sans-serif;letter-spacing:.08em;cursor:pointer;min-width:90px;min-height:70px;display:inline-flex;flex-direction:column;align-items:center;gap:10px}.replay:focus-visible{outline:3px solid var(--focus);outline-offset:4px}.replay svg{width:32px;height:32px;fill:none;stroke:#111;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.hint{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-9px) rotate(-2deg)}75%{transform:translateX(9px) rotate(2deg)}}
+@media(max-width:700px){.game{min-height:500px;padding:14px 8px 22px}.stage,.result{height:215px}.card,.zone,.placed{width:150px;height:130px}.card,.placed{padding:20px 14px 26px;font-size:12px}.feedback{top:147px;font-size:12px}.zones{width:100%;grid-template-columns:150px 150px;gap:18px}.zone{font-size:14px}.score{font-size:16px}.divider{margin:34px auto 22px}.replay{font-size:12px}}
+@media(max-width:340px){.card,.zone,.placed{width:140px;height:124px}.zones{grid-template-columns:140px 140px;gap:10px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<main class="game" aria-label="將工作情境分類為 Chat 或代理機器人">
+  <section id="stage" class="stage" aria-live="polite">
+    <div id="card" class="card" role="button" tabindex="0" aria-label="目前的情境卡片"></div>
+    <div id="feedback" class="feedback" role="alert"><b aria-hidden="true">×</b><span>分類不正確，請再試一次。</span></div>
+  </section>
+  <section id="result" class="result"><div id="score" class="score"></div><div class="divider"></div><button id="replay" class="replay" type="button">再玩一次<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M24.5 9.5A11 11 0 1 0 25 22"/><path d="M24.5 4.5v6h-6"/></svg></button></section>
+  <section class="zones" aria-label="分類區域">
+    <div class="zone" data-choice="chat" role="button" tabindex="0" aria-label="選擇 Chat">Chat</div>
+    <div class="zone" data-choice="agent" role="button" tabindex="0" aria-label="選擇代理機器人">代理機器人</div>
+  </section>
+  <p class="hint">可拖曳卡片到分類區域，或直接點選分類區域。</p>
+</main>
+<script>
+const items=[
+ {text:'使用相同的上下文建立專案摘要與審核檢查項目。',answer:'agent'},
+ {text:'根據摘要建立一封更新電子郵件，並儲存為草稿以供審核。',answer:'agent'},
+ {text:'根據專案摘要與筆記建立 PDF 摘要。',answer:'agent'},
+ {text:'詢問專案摘要通常包含哪些章節。',answer:'chat'},
+ {text:'為專案摘要腦力激盪五個可能的標題。',answer:'chat'}
+];
+const stage=document.getElementById('stage'),card=document.getElementById('card'),zones=[...document.querySelectorAll('.zone')],feedback=document.getElementById('feedback'),result=document.getElementById('result'),score=document.getElementById('score'),replay=document.getElementById('replay');
+let index=0,busy=false,startX=0,startY=0,dragging=false,errorTimer;
+function cardMarkup(text){return `<span>${text}</span><i class="grip" aria-hidden="true"></i>`}
+function clearError(){clearTimeout(errorTimer);feedback.classList.remove('show');zones.forEach(z=>z.classList.remove('error'));card.classList.remove('wrong')}
+function showCard(){busy=false;dragging=false;clearError();card.style.transform='';card.style.opacity='1';card.style.display='flex';stage.style.display='flex';card.classList.remove('dragging');card.innerHTML=cardMarkup(items[index].text);card.setAttribute('aria-label',`第 ${index+1} 張，共 ${items.length} 張：${items[index].text}`)}
+function showError(zone){busy=false;card.style.transform='';card.classList.remove('dragging');void card.offsetWidth;card.classList.add('wrong');zone.classList.add('error');feedback.classList.add('show');errorTimer=setTimeout(clearError,1800)}
+function choose(choice,instant=false){if(busy||index>=items.length)return;clearError();const zone=document.querySelector(`[data-choice="${choice}"]`);if(choice!==items[index].answer){showError(zone);return}busy=true;const placed=document.createElement('div');placed.className='card placed';placed.innerHTML=`<span>${items[index].text}</span><i class="grip" aria-hidden="true"></i><b class="check" aria-label="分類正確">✓</b>`;zone.appendChild(placed);card.style.opacity='0';setTimeout(()=>{placed.remove();index++;if(index<items.length)showCard();else showResult()},instant?30:650)}
+function showResult(){clearError();stage.style.display='none';score.textContent=`${items.length}／${items.length} 張卡片分類正確`;result.classList.add('show')}
+function reset(){index=0;busy=false;result.classList.remove('show');document.querySelectorAll('.placed').forEach(x=>x.remove());showCard()}
+card.addEventListener('pointerdown',e=>{if(busy)return;clearError();dragging=true;startX=e.clientX;startY=e.clientY;card.setPointerCapture(e.pointerId);card.classList.add('dragging')});
+card.addEventListener('pointermove',e=>{if(!dragging)return;const dx=e.clientX-startX,dy=e.clientY-startY;card.style.transform=`translate(${dx}px,${dy}px) rotate(${Math.max(-5,Math.min(5,dx/35))}deg)`;zones.forEach(z=>{const r=z.getBoundingClientRect();z.classList.toggle('hover',e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom)})});
+card.addEventListener('pointerup',e=>{if(!dragging)return;dragging=false;card.releasePointerCapture(e.pointerId);card.classList.remove('dragging');const zone=zones.find(z=>{const r=z.getBoundingClientRect();return e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom});zones.forEach(z=>z.classList.remove('hover'));if(zone)choose(zone.dataset.choice);else card.style.transform=''});
+card.addEventListener('keydown',e=>{if(e.key==='ArrowLeft'){e.preventDefault();choose('chat')}if(e.key==='ArrowRight'){e.preventDefault();choose('agent')}});
+zones.forEach(z=>{z.addEventListener('click',()=>choose(z.dataset.choice));z.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();choose(z.dataset.choice)}})});
+replay.addEventListener('click',reset);
+window.__game={choose,reset,showError};
+showCard();
+if(document.body.dataset.demo==='placement')choose('agent');
+if(document.body.dataset.demo==='error')showError(document.querySelector('[data-choice="chat"]'));
+</script>
+</body>
+</html>
