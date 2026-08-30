@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>負責任使用風險審核指令</title>
+<style>
+:root{--bg:#b8d5ff;--green:#55d94e;--line:#d1d1d1;--ink:#111}*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:"Noto Sans TC","Noto Sans CJK TC",Arial,sans-serif;color:var(--ink);background:var(--bg)}body{padding:18px}.card{max-width:1180px;margin:0 auto;background:#fff;border-radius:12px;padding:24px 22px}.header{display:grid;grid-template-columns:minmax(0,1fr) auto 220px;align-items:center;gap:18px;margin-bottom:18px}.header h1{font-size:30px;line-height:1.2;margin:0}.status{background:var(--green);color:#fff;border-radius:999px;padding:9px 17px;font-size:15px;font-weight:700;white-space:nowrap}.copy{height:58px;border:0;border-radius:999px;background:#000;color:#fff;font-size:17px;font-weight:700;cursor:pointer}.layout{display:grid;grid-template-columns:minmax(0,1fr) 220px;gap:18px}.prompt{border:1.5px solid var(--line);border-radius:8px;padding:22px 24px;min-height:180px;font-size:18px;line-height:1.65;display:flex;align-items:center}.known{align-self:start;min-height:58px;border:1.5px solid var(--line);border-radius:999px;background:#fff;color:#111;padding:12px 18px;font-size:16px;font-weight:700;cursor:pointer}.copy.copied{background:#16794b}.copy:focus-visible,.known:focus-visible{outline:3px solid #2783de;outline-offset:3px}@media(max-width:760px){body{padding:12px}.card{padding:20px 16px}.header{grid-template-columns:1fr auto;gap:12px}.header h1{font-size:24px}.status{font-size:13px;padding:7px 11px}.copy{grid-column:1/-1;height:52px;font-size:15px}.layout{grid-template-columns:1fr}.prompt{min-height:0;padding:18px;font-size:16px;line-height:1.55}.known{width:100%;min-height:52px;font-size:15px}}@media(max-width:430px){.header{grid-template-columns:1fr}.status{justify-self:start}.copy{grid-column:auto}}
+</style>
+</head>
+<body>
+<main class="card">
+<header class="header"><h1>可直接使用的指令</h1><span class="status">已標記為已掌握</span><button class="copy" id="copy" type="button">複製指令</button></header>
+<section class="layout"><div class="prompt" id="prompt">請檢視我的 AI 工作流程計畫是否符合負責任使用原則。請檢查任務適切性、資料敏感度、隱私、機密性、資料來源品質、缺乏依據的主張、工具或應用程式的行為、委派界線、人工審核檢核點，以及任何可能需要我確認的政策問題。請回傳一份精簡的風險審核，並提出可實際執行的修改建議。請勿自行捏造政策；請標記出哪些事項需要由我親自確認。</div><button class="known" id="known" type="button">我已經知道這項內容</button></section>
+</main>
+<script>
+(function(){var c=document.getElementById('copy'),k=document.getElementById('known'),p=document.getElementById('prompt');c.addEventListener('click',async function(){try{await navigator.clipboard.writeText(p.innerText)}catch(e){var r=document.createRange();r.selectNodeContents(p);var s=window.getSelection();s.removeAllRanges();s.addRange(r);document.execCommand('copy');s.removeAllRanges()}c.textContent='已複製指令';c.classList.add('copied');setTimeout(function(){c.textContent='複製指令';c.classList.remove('copied')},1800)});k.addEventListener('click',function(){k.textContent='已標記為已掌握';k.setAttribute('aria-pressed','true')})})();
+</script>
+</body></html>
