@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>選擇 Chat 或代理機器人</title>
+<style>
+:root{--ink:#111;--line:#d8d8d8;--chat:#9b3df4;--agent:#1677ee;--muted:#999}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:"Noto Sans TC","Microsoft JhengHei",Arial,sans-serif;color:var(--ink)}
+body{padding:24px;background:radial-gradient(circle at 10% 10%,#d58eac 0,transparent 34%),radial-gradient(circle at 48% 100%,#b46b9f 0,transparent 38%),linear-gradient(110deg,#d79bb5,#c6b7c3 66%,#c9c9cc)}
+.shell{max-width:1180px;margin:0 auto;background:#fff;border-radius:24px;padding:56px 42px 34px;position:relative;box-shadow:0 1px 0 rgba(255,255,255,.5)}
+.headers{display:grid;grid-template-columns:minmax(0,1fr) 170px minmax(0,1fr);gap:20px;position:absolute;left:42px;right:42px;top:-18px;align-items:center}.head{justify-self:center;background:#050505;color:#fff;border-radius:999px;font-size:20px;font-weight:800;line-height:1;padding:18px 34px;white-space:nowrap}.head:first-child{min-width:270px;text-align:center}.head:nth-child(2){min-width:120px;text-align:center}.head:last-child{min-width:120px;text-align:center}
+.board{display:grid;grid-template-columns:minmax(0,1fr) 170px minmax(0,1fr);gap:20px}.panel{border:2px solid #111;border-radius:20px;padding:18px 36px}.center{padding:18px 0}.rows{display:grid;grid-template-rows:repeat(8,minmax(76px,auto))}.cell{display:flex;align-items:center;border-bottom:1px solid var(--line);font-size:16px;line-height:1.35;padding:12px 8px;opacity:0;transform:translateY(3px);transition:opacity .22s ease,transform .22s ease}.cell:last-child{border-bottom:0}.row.revealed .cell{opacity:1;transform:none}.middle{display:grid;grid-template-rows:repeat(8,minmax(76px,auto));align-items:center}.bridge{position:relative;height:100%;display:flex;align-items:center;justify-content:center}.bridge:before,.bridge:after{content:"";height:2px;background:#111;position:absolute;top:50%;width:calc(50% - 58px)}.bridge:before{left:0}.bridge:after{right:0}
+.choice{position:relative;z-index:1;border:0;border-radius:999px;background:var(--muted);color:#fff;min-width:128px;min-height:52px;padding:8px 16px;display:inline-flex;align-items:center;justify-content:center;gap:9px;font:700 16px/1 "Noto Sans TC","Microsoft JhengHei",Arial,sans-serif;cursor:pointer;transition:transform .18s ease,background .18s ease,box-shadow .18s ease}.choice:hover{transform:translateY(-1px)}.choice:focus-visible{outline:3px solid #111;outline-offset:3px}.choice.chat.active{background:var(--chat);box-shadow:0 4px 14px rgba(155,61,244,.22)}.choice.agent.active{background:var(--agent);box-shadow:0 4px 14px rgba(22,119,238,.22)}.choice svg{width:30px;height:30px;fill:none;stroke:#fff;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;flex:0 0 auto}.choice.agent{font-size:14px;padding-inline:13px}
+@media(max-width:700px){body{padding:10px}.shell{padding:48px 10px 16px;border-radius:16px}.headers{left:10px;right:10px;top:-8px;grid-template-columns:minmax(0,1fr) 96px minmax(0,1fr);gap:6px}.head{font-size:14px;padding:14px 10px;min-width:0!important}.head:first-child{white-space:normal}.board{grid-template-columns:minmax(0,1fr) 96px minmax(0,1fr);gap:6px}.panel{padding:8px 8px;border-radius:14px}.center{padding:8px 0}.rows,.middle{grid-template-rows:repeat(8,minmax(112px,auto))}.cell{font-size:12px;line-height:1.4;padding:10px 4px}.bridge:before,.bridge:after{width:calc(50% - 40px)}.choice{min-width:88px;min-height:48px;padding:6px 8px;gap:4px;font-size:12px}.choice.agent{font-size:11px;padding-inline:5px}.choice svg{width:24px;height:24px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<main class="shell" aria-label="依工作內容選擇 Chat 或代理機器人">
+  <div class="headers" aria-hidden="true"><div class="head">當工作是……</div><div class="head">使用</div><div class="head">原因</div></div>
+  <div class="board">
+    <section class="panel rows left" aria-label="工作類型">
+      <div class="cell" data-cell="0">提出問題，或取得簡短說明。</div>
+      <div class="cell" data-cell="1">腦力激盪不同選項、名稱、範例或切入角度。</div>
+      <div class="cell" data-cell="2">改寫一小段文字、筆記或訊息。</div>
+      <div class="cell" data-cell="3">梳理優缺點。</div>
+      <div class="cell" data-cell="4">建立一份整合多項輸入資料的草稿。</div>
+      <div class="cell" data-cell="5">建立或更新文件、PDF、檢查清單等檔案。</div>
+      <div class="cell" data-cell="6">完成一套多步驟工作流程。</div>
+      <div class="cell" data-cell="7">執行一套日後可能再次使用的可重複工作流程。</div>
+    </section>
+    <section class="center middle" aria-label="選擇工具">
+      <div class="bridge"><button class="choice chat" data-row="0" aria-expanded="false"><svg viewBox="0 0 36 36" aria-hidden="true"><path d="M4 8h21v15H13l-6 5v-5H4z"/><path d="M13 13h19v14H21l-5 4v-4"/></svg><span>Chat</span></button></div>
+      <div class="bridge"><button class="choice chat" data-row="1" aria-expanded="false"><svg viewBox="0 0 36 36" aria-hidden="true"><path d="M4 8h21v15H13l-6 5v-5H4z"/><path d="M13 13h19v14H21l-5 4v-4"/></svg><span>Chat</span></button></div>
+      <div class="bridge"><button class="choice chat" data-row="2" aria-expanded="false"><svg viewBox="0 0 36 36" aria-hidden="true"><path d="M4 8h21v15H13l-6 5v-5H4z"/><path d="M13 13h19v14H21l-5 4v-4"/></svg><span>Chat</span></button></div>
+      <div class="bridge"><button class="choice chat" data-row="3" aria-expanded="false"><svg viewBox="0 0 36 36" aria-hidden="true"><path d="M4 8h21v15H13l-6 5v-5H4z"/><path d="M13 13h19v14H21l-5 4v-4"/></svg><span>Chat</span></button></div>
+      <div class="bridge"><button class="choice agent" data-row="4" aria-expanded="false"><svg viewBox="0 0 36 36" aria-hidden="true"><path d="M9 4l2 6 6 2-6 2-2 6-2-6-6-2 6-2zM25 12l2 5 5 2-5 2-2 5-2-5-5-2 5-2zM14 23l1.5 4 4 1.5-4 1.5-1.5 4-1.5-4-4-1.5 4-1.5z"/></svg><span>代理機器人</span></button></div>
+      <div class="bridge"><button class="choice agent" data-row="5" aria-expanded="false"><svg viewBox="0 0 36 36" aria-hidden="true"><path d="M9 4l2 6 6 2-6 2-2 6-2-6-6-2 6-2zM25 12l2 5 5 2-5 2-2 5-2-5-5-2 5-2zM14 23l1.5 4 4 1.5-4 1.5-1.5 4-1.5-4-4-1.5 4-1.5z"/></svg><span>代理機器人</span></button></div>
+      <div class="bridge"><button class="choice agent" data-row="6" aria-expanded="false"><svg viewBox="0 0 36 36" aria-hidden="true"><path d="M9 4l2 6 6 2-6 2-2 6-2-6-6-2 6-2zM25 12l2 5 5 2-5 2-2 5-2-5-5-2 5-2zM14 23l1.5 4 4 1.5-4 1.5-1.5 4-1.5-4-4-1.5 4-1.5z"/></svg><span>代理機器人</span></button></div>
+      <div class="bridge"><button class="choice agent" data-row="7" aria-expanded="false"><svg viewBox="0 0 36 36" aria-hidden="true"><path d="M9 4l2 6 6 2-6 2-2 6-2-6-6-2 6-2zM25 12l2 5 5 2-5 2-2 5-2-5-5-2 5-2zM14 23l1.5 4 4 1.5-4 1.5-1.5 4-1.5-4-4-1.5 4-1.5z"/></svg><span>代理機器人</span></button></div>
+    </section>
+    <section class="panel rows right" aria-label="選擇原因">
+      <div class="cell" data-cell="0">你希望直接在對話中取得答案。</div>
+      <div class="cell" data-cell="1">你希望快速取得可以進一步思考的點子。</div>
+      <div class="cell" data-cell="2">你只需要改善一小段文字。</div>
+      <div class="cell" data-cell="3">你需要一位能以對話方式協助思考的夥伴。</div>
+      <div class="cell" data-cell="4">你需要協助整合不同來源的細節。</div>
+      <div class="cell" data-cell="5">你希望產出一項具體的工作成果。</div>
+      <div class="cell" data-cell="6">你需要協助建立、審核並分享產出。</div>
+      <div class="cell" data-cell="7">未來你可能想再次執行這類工作。</div>
+    </section>
+  </div>
+</main>
+<script>
+const buttons=[...document.querySelectorAll('.choice')];
+function setRow(i,on){
+  document.querySelectorAll(`[data-cell="${i}"]`).forEach(el=>el.parentElement.classList.toggle('noop',false));
+  const cells=document.querySelectorAll(`[data-cell="${i}"]`);
+  cells.forEach(el=>el.classList.toggle('shown',on));
+  cells.forEach(el=>{ const side=el.closest('.rows'); if(side) side.querySelector(`[data-cell="${i}"]`).style.opacity=on?'1':'0'; });
+  const b=document.querySelector(`[data-row="${i}"]`); b.classList.toggle('active',on); b.setAttribute('aria-expanded',String(on));
+}
+buttons.forEach(btn=>btn.addEventListener('click',()=>setRow(btn.dataset.row,!btn.classList.contains('active'))));
+if(document.body.dataset.all==='true') buttons.forEach(btn=>setRow(btn.dataset.row,true));
+</script>
+</body>
+</html>
