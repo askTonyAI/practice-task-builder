@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>反思工作流程指令</title>
+<style>
+:root{--bg:#b7d4ff;--ink:#111;--orange:#ff7a16;--line:#cfcfcf}*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:"Noto Sans TC","Noto Sans CJK TC",Arial,sans-serif;color:var(--ink);background:var(--bg)}body{padding:18px}.card{max-width:1180px;margin:0 auto;background:#fff;border-radius:12px;padding:24px 22px}.top{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-bottom:18px}.top h1{font-size:30px;line-height:1.25;margin:0}.status{display:inline-flex;align-items:center;justify-content:center;white-space:nowrap;background:var(--orange);color:#fff;border-radius:999px;padding:9px 18px;font-size:16px;font-weight:700}.layout{display:grid;grid-template-columns:minmax(0,1fr) 220px;gap:18px}.prompt{border:1.5px solid var(--line);border-radius:8px;padding:22px 24px;font-size:18px;line-height:1.48;white-space:pre-line;min-height:375px}.actions{display:flex;flex-direction:column;gap:14px}.btn{width:100%;min-height:58px;border-radius:999px;padding:13px 18px;font-size:17px;font-weight:700;cursor:pointer}.copy{background:#000;color:#fff;border:2px solid #000}.known{background:#fff;color:#111;border:1.5px solid var(--line)}.copy.copied{background:#16794b;border-color:#16794b}.btn:focus-visible{outline:3px solid #2783de;outline-offset:3px}@media(max-width:760px){body{padding:12px}.card{padding:20px 16px}.top{align-items:flex-start}.top h1{font-size:24px}.status{font-size:13px;padding:7px 12px}.layout{grid-template-columns:1fr}.prompt{font-size:16px;line-height:1.5;min-height:0;padding:18px}.actions{display:grid;grid-template-columns:1fr 1fr}.btn{min-height:52px;font-size:15px}}@media(max-width:430px){.top{flex-direction:column;gap:10px}.actions{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<main class="card">
+<header class="top"><h1>可直接使用的指令</h1><span class="status">指令已就緒</span></header>
+<section class="layout">
+<div class="prompt" id="prompt">我正在完成我的每週會議工作流程資料包。請協助我反思目前為止建立的工作流程。
+請使用以下標題：
+我的可重複工作流程
+我需要的輸入資料
+我的逐步流程
+我的產出格式
+我的最終品質檢查
+ChatGPT 最能提供協助的地方
+仍然需要人類判斷的地方
+下週再次使用這套工作流程前，我應該改善的項目
+請讓這份反思務實、符合我的角色，並聚焦於如何提升每週會議準備的品質。</div>
+<div class="actions">
+<button class="btn copy" id="copy" type="button">複製指令</button>
+<button class="btn known" id="known" type="button">我已經知道這項內容</button>
+</div>
+</section>
+</main>
+<script>
+(function(){
+var copy=document.getElementById('copy'),known=document.getElementById('known'),prompt=document.getElementById('prompt');
+copy.addEventListener('click',async function(){
+try{await navigator.clipboard.writeText(prompt.innerText);copy.textContent='已複製指令';copy.classList.add('copied');setTimeout(function(){copy.textContent='複製指令';copy.classList.remove('copied')},1800)}catch(e){var r=document.createRange();r.selectNodeContents(prompt);var s=window.getSelection();s.removeAllRanges();s.addRange(r);document.execCommand('copy');s.removeAllRanges();copy.textContent='已複製指令'}
+});
+known.addEventListener('click',function(){var active=known.getAttribute('aria-pressed')==='true';known.setAttribute('aria-pressed',active?'false':'true');known.textContent=active?'我已經知道這項內容':'已標記為知道'});
+})();
+</script>
+</body>
+</html>
